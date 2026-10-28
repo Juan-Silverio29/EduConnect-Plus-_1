@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ foro.titulo }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Poppins', sans-serif; }
+
+        .foro-header {
+            background: linear-gradient(90deg, #b8b9bb, #e1e1e3);
+            color: #222;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .foro-header h2 {
+            font-weight: 700;
+            color: #212529;
+        }
+
+        .foro-header small {
+            color: #555;
+        }
+
+        .comentario-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .comentario-card small {
+            color: #6c757d;
+        }
+
+        /* Estilo para los enlaces de archivos */
+        .link-adjunto {
+            color: #0b9e23;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .link-adjunto:hover {
+            color: #007a1b;
+            text-decoration: underline;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+<div class="container my-5">
+
+    <!-- 🟦 Encabezado del foro -->
+    <div class="foro-header shadow">
+        <h2><i class="bi bi-megaphone-fill"></i> {{ foro.titulo }}</h2>
+        <p class="mb-0">{{ foro.descripcion }}</p>
+        <small>Publicado por {{ foro.autor.username }} | {{ foro.fecha_creacion|date:"d M, Y H:i" }}</small>
+
+        {% if foro.archivo %}
+            <p class="mt-2">
+                <i class="bi bi-paperclip"></i>
+                <a href="{{ foro.archivo.url }}" class="link-adjunto" target="_blank">Ver archivo adjunto</a>
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- 💬 Sección de comentarios -->
+    <div class="mt-4">
+        <h4><i class="bi bi-chat-dots"></i> Comentarios</h4>
+        {% if comentarios %}
+            {% for comentario in comentarios %}
+            <div class="comentario-card">
+                <p>{{ comentario.texto }}</p>
+                <small>Por {{ comentario.autor.username }} - {{ comentario.fecha|date:"d M Y H:i" }}</small><br>
+
+                {% if comentario.archivo %}
+                    <p class="mt-2 mb-0">
+                        <i class="bi bi-paperclip"></i>
+                        <a href="{{ comentario.archivo.url }}" target="_blank" class="link-adjunto">
+                            Ver archivo adjunto
+                        </a>
+                    </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+        {% endif %}
+    </div>
+
+    <!-- 📝 Formulario de comentario -->
+    <div class="form-section mt-4">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <textarea name="texto" rows="3" class="form-control" placeholder="Escribe tu comentario aquí..." required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Adjuntar archivo (opcional)</label>
+                <input type="file" name="archivo" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-send"></i> Comentar
+            </button>
+            <a href="{% url 'foros' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Regresar
+            </a>
+        </form>
+    </div>
+</div>
+
+<!-- Iconos y JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

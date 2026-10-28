@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estadísticas | EduConnect+</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+
+<div class="min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-800 text-white p-6">
+        <h2 class="text-2xl font-bold mb-6">EduConnect+</h2>
+        <nav class="space-y-3">
+            <a href="{% url 'dashboard_admin' %}" class="block py-2 px-3 rounded hover:bg-blue-700">🏠 Panel</a>
+            <a href="{% url 'admin_usuarios' %}" class="block py-2 px-3 rounded hover:bg-blue-700">👤 Usuarios</a>
+            <a href="{% url 'admin_cursos' %}" class="block py-2 px-3 rounded hover:bg-blue-700">📚 Cursos</a>
+            <a href="{% url 'admin_estadisticas' %}" class="block py-2 px-3 rounded bg-blue-700">📊 Estadísticas</a>
+        </nav>
+    </aside>
+
+    <!-- Contenido -->
+    <main class="flex-1 p-8">
+        <h1 class="text-3xl font-bold text-gray-700 mb-6">Estadísticas de la Plataforma</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow p-8 text-center">
+                <div class="text-5xl mb-3">👥</div>
+                <div class="text-4xl font-bold text-blue-700">{{ usuarios }}</div>
+                <div class="text-gray-500 mt-2">Usuarios registrados</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-8 text-center">
+                <div class="text-5xl mb-3">🧑‍🏫</div>
+                <div class="text-4xl font-bold text-green-600">{{ profesores }}</div>
+                <div class="text-gray-500 mt-2">Profesores activos</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-8 text-center">
+                <div class="text-5xl mb-3">📚</div>
+                <div class="text-4xl font-bold text-purple-600">{{ cursos }}</div>
+                <div class="text-gray-500 mt-2">Cursos publicados</div>
+            </div>
+        </div>
+
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-gray-700 mb-2">📈 Interpretación</h2>
+            <p class="text-gray-600">
+                Con {{ cursos }} cursos y {{ usuarios }} usuarios registrados
+                {% if cursos > 0 %}hay una oferta académica activa en la plataforma{% else %}aún no hay cursos publicados; anima a tus profesores a crear el primero{% endif %}.
+                Actualiza esta página después de cada registro para ver los cambios.
+            </p>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

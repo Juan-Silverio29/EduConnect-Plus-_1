@@ -1,0 +1,128 @@
+﻿[
+    {
+        "model":  "auth.user",
+        "pk":  1,
+        "fields":  {
+                       "username":  "admin",
+                       "password":  "pbkdf2_sha256$600000$ABCD1234$E8kPqJtFZ7h9RwYJcvZbV2FtM3oKx4uR92UwzZB2D4M=",
+                       "email":  "admin@educonnect.com",
+                       "is_superuser":  true,
+                       "is_staff":  true,
+                       "is_active":  true
+                   }
+    },
+    {
+        "model":  "auth.user",
+        "pk":  2,
+        "fields":  {
+                       "username":  "profesor_demo",
+                       "password":  "pbkdf2_sha256$600000$ZZZ999$JtYpOa1wZZg5KxP0b9lHdDg8r3AxM2kYu6sXwE8f9J0=",
+                       "email":  "profesor@educonnect.com",
+                       "is_superuser":  false,
+                       "is_staff":  true,
+                       "is_active":  true
+                   }
+    },
+    {
+        "model":  "auth.user",
+        "pk":  3,
+        "fields":  {
+                       "username":  "estudiante_demo",
+                       "password":  "pbkdf2_sha256$600000$YYY111$FtY9T3sKg1mUoQe7p9sB7qX4K1oZ2a8lLm8qY5QmW4Q=",
+                       "email":  "estudiante@educonnect.com",
+                       "is_superuser":  false,
+                       "is_staff":  false,
+                       "is_active":  true
+                   }
+    },
+    {
+        "model":  "auth_app.perfilusuario",
+        "pk":  1,
+        "fields":  {
+                       "alias":  "Prof. GarcÃ­a",
+                       "semestre":  null,
+                       "is_teacher":  true,
+                       "user":  2
+                   }
+    },
+    {
+        "model":  "auth_app.perfilusuario",
+        "pk":  2,
+        "fields":  {
+                       "alias":  "Juan PÃ©rez",
+                       "semestre":  "3",
+                       "is_teacher":  false,
+                       "user":  3
+                   }
+    },
+    {
+        "model":  "dashboard.curso",
+        "pk":  1,
+        "fields":  {
+                       "nombre":  "IntroducciÃ³n a Python",
+                       "descripcion":  "Curso base sobre programaciÃ³n en Python.",
+                       "profesor":  2
+                   }
+    },
+    {
+        "model":  "dashboard.curso",
+        "pk":  2,
+        "fields":  {
+                       "nombre":  "Desarrollo Web con Django",
+                       "descripcion":  "Curso avanzado sobre desarrollo de aplicaciones web con Django.",
+                       "profesor":  2
+                   }
+    },
+    {
+        "model":  "resources.recursos",
+        "pk":  1,
+        "fields":  {
+                       "titulo":  "GuÃ­a de variables en Python",
+                       "descripcion":  "Documento PDF con ejemplos bÃ¡sicos.",
+                       "autor":  2,
+                       "fecha_creacion":  "2024-10-01T10:00:00Z",
+                       "completado":  false
+                   }
+    },
+    {
+        "model":  "resources.recursos",
+        "pk":  2,
+        "fields":  {
+                       "titulo":  "Proyecto Django ejemplo",
+                       "descripcion":  "Repositorio de muestra con un proyecto educativo.",
+                       "autor":  2,
+                       "fecha_creacion":  "2024-10-02T10:00:00Z",
+                       "completado":  false
+                   }
+    },
+    {
+        "model":  "forum.foro",
+        "pk":  1,
+        "fields":  {
+                       "titulo":  "Bienvenida al curso",
+                       "contenido":  "PresÃ©ntate con tus intereses de aprendizaje.",
+                       "autor":  2,
+                       "fecha":  "2024-10-01T09:00:00Z",
+                       "fijado":  true
+                   }
+    },
+    {
+        "model":  "forum.comentario",
+        "pk":  1,
+        "fields":  {
+                       "foro":  1,
+                       "texto":  "Hola profesor, emocionado por aprender Python.",
+                       "autor":  3,
+                       "fecha":  "2024-10-01T09:15:00Z"
+                   }
+    },
+    {
+        "model":  "analytics.progreso",
+        "pk":  1,
+        "fields":  {
+                       "usuario":  3,
+                       "curso":  1,
+                       "porcentaje":  45
+                   }
+    }
+]

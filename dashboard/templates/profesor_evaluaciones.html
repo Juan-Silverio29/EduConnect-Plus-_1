@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Evaluaciones del Profesor - EduConnect+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #eef3ff;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* ======= ENCABEZADO ======= */
+    header {
+      background: linear-gradient(90deg, #000, #0d6efd);
+      color: white;
+      text-align: center;
+      padding: 25px 0;
+      border-bottom: 4px solid #0d6efd;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+
+    header h1 {
+      font-weight: 700;
+      font-size: 1.9rem;
+    }
+
+    /* ======= CONTENEDOR ======= */
+    .container {
+      max-width: 950px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+
+    .titulo {
+      background: #0d6efd;
+      color: white;
+      text-align: center;
+      padding: 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 25px;
+    }
+
+    /* ======= EVALUACIONES ======= */
+    .evaluacion {
+      background: #f8faff;
+      border: 1px solid #dce3f0;
+      border-left: 6px solid #0d6efd;
+      padding: 18px 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      transition: 0.25s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .evaluacion:hover {
+      transform: translateY(-3px);
+      background: #eef3ff;
+    }
+
+    .evaluacion strong {
+      color: #0b173d;
+    }
+
+    .badge-curso {
+      background-color: #0d6efd;
+      font-size: 0.85rem;
+      margin-left: 5px;
+    }
+
+    /* ======= BOTONES ======= */
+    .btn-crear {
+      display: block;
+      background: #0d6efd;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-align: center;
+      margin: 25px auto;
+      transition: 0.3s;
+      width: 250px;
+    }
+
+    .btn-crear:hover {
+      background: #0047b3;
+    }
+
+    .btn-accion {
+      border-radius: 8px;
+      font-weight: 500;
+      padding: 6px 10px;
+      margin-right: 6px;
+    }
+
+    .btn-volver {
+      background-color: #555;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: 0.2s;
+    }
+
+    .btn-volver:hover {
+      background-color: #333;
+      color: #fff;
+    }
+
+    footer {
+      background-color: #111;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      margin-top: 40px;
+      border-top: 3px solid #0d6efd;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ENCABEZADO -->
+  <header>
+    <h1>📝 Evaluaciones del Profesor</h1>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="container">
+    <div class="titulo">Consulta y gestiona tus evaluaciones</div>
+
+    {% if evaluaciones %}
+      {% for eval in evaluaciones %}
+        <div class="evaluacion">
+          <h5><strong>{{ eval.nombre }}</strong></h5>
+          <p>📘 <strong>Curso:</strong> <span class="badge badge-curso bg-primary">{{ eval.curso }}</span></p>
+          <p>📅 <strong>Fecha:</strong> {{ eval.fecha }}</p>
+
+          <div class="d-flex justify-content-start mt-2">
+            <a href="{% url 'dashboard:detalle_evaluacion' eval.id %}" class="btn btn-primary btn-sm btn-accion">👁 Ver</a>
+            <a href="{% url 'dashboard:editar_evaluacion' eval.id %}" class="btn btn-warning btn-sm btn-accion">✏️ Editar</a>
+            <a href="{% url 'dashboard:eliminar_evaluacion' eval.id %}" class="btn btn-danger btn-sm btn-accion">🗑 Eliminar</a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-center text-muted mt-3">No hay evaluaciones programadas.</p>
+    {% endif %}
+
+    <a href="{% url 'dashboard:crear_evaluacion' %}" class="btn-crear">➕ Crear nueva evaluación</a>
+    <div class="text-center mt-3">
+      <a href="{% url 'dashboard:dashboard_profesor' %}" class="btn-volver">← Volver al dashboard</a>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 EduConnect Plus - Todos los derechos reservados
+  </footer>
+</body>
+</html>

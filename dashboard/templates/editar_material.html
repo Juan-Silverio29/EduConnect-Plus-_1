@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar material - EduConnect+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-color:#f7f9fc;font-family:'Poppins',sans-serif;">
+  <div class="container mt-5">
+    <h2 class="text-center text-primary mb-4">✏️ Editar material</h2>
+
+    <form method="post" enctype="multipart/form-data" class="p-4 bg-white shadow rounded">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Título:</label>
+        <input type="text" name="titulo" value="{{ material.titulo }}" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Tipo:</label>
+        <select name="tipo" class="form-select">
+          <option value="{{ material.tipo }}" selected>{{ material.tipo }}</option>
+          <option value="PDF">PDF</option>
+          <option value="Presentación">Presentación</option>
+          <option value="Video">Video</option>
+          <option value="Enlace">Enlace</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Archivo:</label>
+        <input type="file" name="archivo" class="form-control">
+        {% if material.archivo %}
+          <p class="mt-2 text-muted">Archivo actual: <a href="{{ material.archivo.url }}" target="_blank">{{ material.archivo.name }}</a></p>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Enlace:</label>
+        <input type="url" name="enlace" value="{{ material.enlace }}" class="form-control">
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+        <a href="{% url 'dashboard:profesor_material' %}" class="btn btn-secondary ms-2">⬅ Volver</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

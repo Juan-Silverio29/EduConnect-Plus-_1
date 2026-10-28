@@ -1,0 +1,553 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Profesor - EduConnect+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f4f9ff; font-family: 'Segoe UI', sans-serif; }
+
+    .sidebar {
+      height: 100vh;
+      background: #0d1b2a;
+      color: white;
+      padding: 20px;
+      min-width: 220px;
+    }
+    .sidebar h2 { font-size: 1.6rem; margin-bottom: 2rem; font-weight: 700; }
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+    .sidebar a:hover, .sidebar a.active { background: #0d6efd; }
+    .sidebar a.logout { background: #e63946; }
+    .sidebar a.logout:hover { background: #c1121f; }
+
+    .welcome-card {
+      background: linear-gradient(135deg, #3a0ca3, #4361ee);
+      color: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      font-weight: 500;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-4px); }
+    .stat-card h5 { margin-bottom: 10px; font-weight: 600; }
+    .stat-blue { border-top: 5px solid #0d6efd; }
+    .stat-green { border-top: 5px solid #2a9d8f; }
+    .stat-orange { border-top: 5px solid #f77f00; }
+    .stat-purple { border-top: 5px solid #9d4edd; }
+
+    .course-card { transition: 0.2s; }
+    .course-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+
+    .table thead th { background-color: #0d1b2a; color: white; }
+    .table tbody tr:hover { background-color: #e9f2ff; }
+
+    /* Estilos para el chat AI flotante */
+    .ai-chat-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+
+    .ai-chat-panel {
+        width: 380px;
+        height: 500px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        display: none;
+        flex-direction: column;
+        margin-bottom: 16px;
+    }
+
+    .ai-chat-panel.show {
+        display: flex !important;
+    }
+
+    .ai-chat-header {
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        color: white;
+        padding: 16px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ai-chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        background: #f8fafc;
+    }
+
+    .ai-chat-input-container {
+        padding: 16px;
+        border-top: 1px solid #e2e8f0;
+        background: white;
+    }
+
+    .chat-toggle-btn {
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        color: white;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: transform 0.2s;
+    }
+
+    .chat-toggle-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .message {
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 85%;
+        word-wrap: break-word;
+    }
+
+    .user-message {
+        background: #3b82f6;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+    }
+
+    .ai-message {
+        background: white;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .typing-indicator {
+        display: none;
+        padding: 8px 12px;
+        color: #64748b;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    .quick-btn {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        margin: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>EduConnect+</h2>
+      <a href="{% url 'dashboard:dashboard_profesor' %}" class="active">🏠 Dashboard</a>
+      <a href="{% url 'dashboard:profesor_cursos' %}">📚 Mis Cursos</a>
+      <a href="{% url 'dashboard:profesor_evaluaciones' %}">📝 Evaluaciones</a>
+      <a href="{% url 'dashboard:profesor_material' %}">📤 Material Didáctico</a>
+      <a href="{% url 'dashboard:foros_profesor' %}">💬 Foro Académico</a>
+      <a href="{% url 'configuracion_profesor' %}">⚙️ Configuración</a>
+      <a href="{% url 'logout' %}" class="logout">🚪 Cerrar Sesión</a>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="p-4 flex-grow-1">
+
+      <!-- Mensajes -->
+      {% if messages %}
+        <div id="alert-container" class="position-relative">
+          {% for message in messages %}
+            <div class="alert alert-dismissible fade show 
+                        {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}" 
+                role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+        <script>
+          setTimeout(() => {
+            document.querySelectorAll('#alert-container .alert').forEach(el => el.remove());
+          }, 5000);
+        </script>
+      {% endif %}
+
+      <!-- Bienvenida -->
+      <div class="welcome-card">
+        <h2>👩‍🏫 Hola, {{ user.first_name }} {{ user.last_name }}!</h2>
+        <p>Bienvenido a tu panel de profesor en EduConnect 📚</p>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <div class="stat-card stat-blue">
+            <h5>Cursos Activos</h5>
+            <p class="display-6">{{ cursos_activos }}</p>
+            <small class="text-muted">Cursos creados</small>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card stat-green">
+            <h5>Alumnos Inscritos</h5>
+            <p class="display-6">{{ alumnos_inscritos }}</p>
+            <small class="text-muted">Total estudiantes</small>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card stat-orange">
+            <h5>Material Subido</h5>
+            <p class="display-6">{{ material_subido }}</p>
+            <small class="text-muted">Recursos compartidos</small>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card stat-purple">
+            <h5>Tareas Revisadas</h5>
+            <p class="display-6">{{ tareas_revisadas }}</p>
+            <small class="text-muted">Evaluaciones</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cursos recientes -->
+      <h4 class="mt-4">📖 Mis Cursos Recientes</h4>
+      <div class="row g-3 mt-2">
+        {% for curso in cursos %}
+        <div class="col-md-6">
+          <div class="card course-card">
+            <div class="card-body">
+              <h5>{{ curso.nombre }} {% if curso.grupo %}- Grupo {{ curso.grupo }}{% endif %}</h5>
+              <p class="text-muted">📘 {{ curso.categoria|default:"Sin categoría" }}</p>
+              <p><small>📅 Creado: {{ curso.fecha_creacion|date:"d/m/Y" }}</small></p>
+              
+              {% if curso.id %}
+                <a href="{% url 'dashboard:detalle_curso' curso.id %}" class="btn btn-primary btn-sm mt-2">Gestionar Curso</a>
+              {% else %}
+                <span class="btn btn-secondary btn-sm mt-2" disabled>Curso no disponible</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <div class="alert alert-info">
+            <strong>📝 Aún no has creado cursos.</strong>
+            <a href="{% url 'dashboard:crear_curso' %}" class="btn btn-outline-primary btn-sm ms-2">Crear Primer Curso</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Evaluaciones Próximas -->
+      <h4 class="mt-4">📋 Evaluaciones Próximas</h4>
+      <div class="card mt-2">
+        <div class="card-body">
+          {% if evaluaciones %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Curso</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for eval in evaluaciones %}
+                <tr>
+                  <td>{{ eval.nombre }}</td>
+                  <td>{{ eval.curso.nombre }}</td>
+                  <td>{{ eval.fecha|date:"d/m/Y" }}</td>
+                  <td>
+                    <a href="{% url 'dashboard:detalle_evaluacion' eval.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-4">
+            <p class="text-muted">No hay evaluaciones programadas.</p>
+            <a href="{% url 'dashboard:crear_evaluacion' %}" class="btn btn-outline-primary btn-sm">Crear Evaluación</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Acciones Rápidas -->
+      <h4 class="mt-4">⚡ Acciones Rápidas</h4>
+      <div class="row g-3 mt-2">
+        <div class="col-md-3">
+          <a href="{% url 'dashboard:crear_curso' %}" class="btn btn-primary w-100 h-100 py-3">
+            <div class="text-center">
+              <h5>📘</h5>
+              <h6>Crear Curso</h6>
+              <small class="text-light">Nuevo curso</small>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-3">
+          <a href="{% url 'dashboard:crear_evaluacion' %}" class="btn btn-success w-100 h-100 py-3">
+            <div class="text-center">
+              <h5>📝</h5>
+              <h6>Nueva Evaluación</h6>
+              <small class="text-light">Examen o tarea</small>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-3">
+          <a href="{% url 'dashboard:profesor_material' %}" class="btn btn-warning w-100 h-100 py-3">
+            <div class="text-center">
+              <h5>📤</h5>
+              <h6>Subir Material</h6>
+              <small class="text-light">Recursos didácticos</small>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-3">
+          <a href="{% url 'dashboard:foros_profesor' %}" class="btn btn-info w-100 h-100 py-3">
+            <div class="text-center">
+              <h5>💬</h5>
+              <h6>Foros</h6>
+              <small class="text-light">Moderar discusiones</small>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat AI Tutor para Profesor -->
+  <div class="ai-chat-container">
+    <div class="ai-chat-panel" id="aiChatPanel">
+      <div class="ai-chat-header">
+        <strong>🤖 EduConnect AI - Asistente Profesor</strong>
+        <button id="aiChatClose" class="btn btn-sm text-white">✕</button>
+      </div>
+      <div class="ai-chat-messages" id="aiChatMessages">
+        <div class="message ai-message">
+          ¡Hola profesor {{ user.first_name }}! Soy su asistente AI especializado en educación. 
+          Veo que tiene {{ cursos_activos }} cursos activos y {{ alumnos_inscritos }} alumnos. 
+          ¿En qué puedo ayudarle hoy con la gestión docente?
+        </div>
+      </div>
+      <div class="typing-indicator" id="typingIndicator">
+        AI está escribiendo...
+      </div>
+      <div class="ai-chat-input-container">
+        <form id="aiChatForm" class="d-flex gap-2">
+          <input type="text" id="aiChatInput" class="form-control" 
+                 placeholder="Escriba su pregunta sobre gestión docente..." 
+                 autocomplete="off">
+          <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+        
+        <!-- Botones rápidos PARA PROFESOR -->
+        <div class="mt-2 d-flex flex-wrap gap-1">
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Crear curso</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Subir material</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Evaluaciones</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Foro académico</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Calificar</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Reportes</button>
+        </div>
+      </div>
+    </div>
+    <button class="chat-toggle-btn" id="aiChatToggle">🤖</button>
+  </div>
+
+  <footer class="footer mt-4 text-center">
+    <p>&copy; 2025 EduConnect+. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Sistema de Chat AI para Profesores
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatToggle = document.getElementById('aiChatToggle');
+      const chatPanel = document.getElementById('aiChatPanel');
+      const chatClose = document.getElementById('aiChatClose');
+      const chatForm = document.getElementById('aiChatForm');
+      const chatInput = document.getElementById('aiChatInput');
+      const chatMessages = document.getElementById('aiChatMessages');
+      const typingIndicator = document.getElementById('typingIndicator');
+
+      // Datos del profesor
+      const teacherData = {
+        firstName: "{{ user.first_name }}",
+        cursosActivos: parseInt("{{ cursos_activos }}") || 0,
+        alumnosInscritos: parseInt("{{ alumnos_inscritos }}") || 0,
+        materialSubido: parseInt("{{ material_subido }}") || 0,
+        tareasRevisadas: parseInt("{{ tareas_revisadas }}") || 0
+      };
+
+      // Respuestas inteligentes para PROFESORES
+      const teacherResponses = {
+        'crear curso': `📘 Para crear un curso: Ve a "Mis Cursos" → "Crear Curso". Complete nombre, descripción, categoría y configure los ajustes. ¡En 5 minutos tendrá su curso listo!`,
+        'subir material': `📤 Para subir material: "Material Didáctico" → "Subir". Formatos: PDF, PPT, Word, videos, imágenes. Organice por unidades temáticas.`,
+        'evaluaciones': `📝 Gestión de evaluaciones: Puede crear quizzes, tareas o proyectos. Configure fechas límite, criterios de calificación y adjunte rúbricas.`,
+        'foro académico': `💬 Para gestionar foros: "Foro Académico" → cree temas, modere discusiones, fije anuncios importantes. Ideal para aprendizaje colaborativo.`,
+        'calificar': `✏️ Para calificar: "Evaluaciones" → seleccione la evaluación → "Ver Entregas". Use rúbricas o calificación manual con comentarios personalizados.`,
+        'reportes': `📊 Para reportes: "Dashboard" → "Reportes". Genere análisis de: progreso individual, participación, calificaciones por evaluación y tendencias.`,
+        'alumnos': `👥 Gestión de estudiantes: En cada curso → "Participantes". Puede agregar estudiantes, ver progreso individual y enviar mensajes directos.`,
+        'configuración': `⚙️ Configuración: "Configuración Profesor" → edite perfil, ajuste notificaciones, gestione firma digital y preferencias de plataforma.`,
+        'default': `Puedo ayudarle con: creación de cursos, gestión de estudiantes, diseño de evaluaciones, materiales didácticos, foros académicos y análisis de progreso. ¿En qué área necesita asistencia?`
+      };
+
+      // Toggle del chat
+      chatToggle.addEventListener('click', function() {
+        chatPanel.classList.toggle('show');
+        if (chatPanel.classList.contains('show')) {
+          chatInput.focus();
+        }
+      });
+
+      // Cerrar chat
+      chatClose.addEventListener('click', function() {
+        chatPanel.classList.remove('show');
+      });
+
+      // Enviar mensaje (conectado al backend con IA real)
+      async function pedirAlBackend(message) {
+        try {
+          const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+          const resp = await fetch("{% url 'dashboard:ai_chat_api' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf},
+            body: JSON.stringify({message: message, rol: 'profesor'})
+          });
+          const data = await resp.json();
+          return data.reply || 'No pude procesar su pregunta, inténtelo de nuevo.';
+        } catch (e) {
+          return generateTeacherResponse(message); // fallback local si falla la red
+        }
+      }
+
+      chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (message) {
+          addMessage(message, 'user');
+          chatInput.value = '';
+          showTypingIndicator();
+          const response = await pedirAlBackend(message);
+          hideTypingIndicator();
+          addMessage(response, 'ai');
+        }
+      });
+
+      // Tecla Enter para enviar
+      chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          chatForm.dispatchEvent(new Event('submit'));
+        }
+      });
+
+      // Botones rápidos PARA PROFESOR (también van al backend)
+      document.querySelectorAll('.quick-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const message = btn.textContent;
+          addMessage(message, 'user');
+          showTypingIndicator();
+          const response = await pedirAlBackend(message);
+          hideTypingIndicator();
+          addMessage(response, 'ai');
+        });
+      });
+
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.textContent = text;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function showTypingIndicator() {
+        typingIndicator.style.display = 'block';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function hideTypingIndicator() {
+        typingIndicator.style.display = 'none';
+      }
+
+      function generateTeacherResponse(userMessage) {
+        const messageLower = userMessage.toLowerCase();
+        
+        if (messageLower.includes('crear curso') || messageLower.includes('nuevo curso')) {
+          return teacherResponses['crear curso'];
+        } else if (messageLower.includes('subir material') || messageLower.includes('material') || messageLower.includes('recurso')) {
+          return teacherResponses['subir material'];
+        } else if (messageLower.includes('evaluacion') || messageLower.includes('examen') || messageLower.includes('tarea')) {
+          return teacherResponses['evaluaciones'];
+        } else if (messageLower.includes('foro') || messageLower.includes('discusion')) {
+          return teacherResponses['foro académico'];
+        } else if (messageLower.includes('calificar') || messageLower.includes('revisar') || messageLower.includes('corregir')) {
+          return teacherResponses['calificar'];
+        } else if (messageLower.includes('reporte') || messageLower.includes('estadistica')) {
+          return teacherResponses['reportes'];
+        } else if (messageLower.includes('alumno') || messageLower.includes('estudiante')) {
+          return teacherResponses['alumnos'];
+        } else if (messageLower.includes('configurar') || messageLower.includes('ajuste')) {
+          return teacherResponses['configuración'];
+        } else if (messageLower.includes('hola') || messageLower.includes('buenas')) {
+          return `👋 ¡Hola profesor ${teacherData.firstName}! Soy su asistente AI. ¿En qué puedo ayudarle con la gestión docente hoy?`;
+        } else {
+          return teacherResponses['default'];
+        }
+      }
+
+      // Cerrar chat al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        if (!chatPanel.contains(e.target) && !chatToggle.contains(e.target) && chatPanel.classList.contains('show')) {
+          chatPanel.classList.remove('show');
+        }
+      });
+
+      // Efectos visuales
+      chatToggle.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.1)';
+      });
+
+      chatToggle.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+      });
+    });
+  </script>
+</body>
+</html>

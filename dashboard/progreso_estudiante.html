@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Progreso - EduConnect+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar">
+            <h2>EduConnect</h2>
+            <a href="{% url 'dashboard:dashboard_user' %}">🏠 Dashboard</a>
+            <a href="{% url 'dashboard:cursos_disponibles' %}">📘 Cursos Disponibles</a>
+            <a href="{% url 'dashboard:mis_recursos' %}">📚 Mis Recursos</a>
+            <a href="{% url 'foros' %}">💬 Foros</a>
+            <a href="{% url 'dashboard:logros_recursos_completados' %}" class="active">📊 Mi Progreso</a>
+            <a href="{% url 'configuracion' %}">⚙️ Configuración</a>
+            <a href="{% url 'logout' %}" class="logout">🚪 Cerrar Sesión</a>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="col-md-9 p-4">
+            <h2>📊 Mi Progreso Académico</h2>
+            
+            <div class="row mt-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card stat-blue">
+                        <h5>Cursos Inscritos</h5>
+                        <p class="display-6">{{ user_cursos_count }}</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card stat-green">
+                        <h5>Recursos Completados</h5>
+                        <p class="display-6">{{ recursos_completados }}</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card stat-orange">
+                        <h5>Horas de Estudio</h5>
+                        <p class="display-6">{{ tiempo_estudio }}h</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card stat-purple">
+                        <h5>Logros Obtenidos</h5>
+                        <p class="display-6">{{ logros_obtenidos }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cursos con progreso -->
+            <h4 class="mt-4">📖 Progreso por Curso</h4>
+            <div class="row g-3 mt-2">
+                {% for inscripcion in cursos_inscritos %}
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>{{ inscripcion.curso.nombre }}</h5>
+                            <p class="text-muted">{{ inscripcion.curso.categoria|default:"Sin categoría" }}</p>
+                            
+                            <div class="progress mb-2">
+                                <div class="progress-bar" style="width: 60%">60%</div>
+                            </div>
+                            <small class="text-muted">Progreso general del curso</small>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No estás inscrito en ningún curso.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

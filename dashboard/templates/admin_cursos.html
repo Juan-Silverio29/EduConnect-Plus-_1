@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Cursos | EduConnect+</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+
+<div class="min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-800 text-white p-6">
+        <h2 class="text-2xl font-bold mb-6">EduConnect+</h2>
+        <nav class="space-y-3">
+            <a href="{% url 'dashboard_admin' %}" class="block py-2 px-3 rounded hover:bg-blue-700">🏠 Panel</a>
+            <a href="{% url 'admin_usuarios' %}" class="block py-2 px-3 rounded hover:bg-blue-700">👤 Usuarios</a>
+            <a href="{% url 'admin_cursos' %}" class="block py-2 px-3 rounded bg-blue-700">📚 Cursos</a>
+            <a href="{% url 'admin_estadisticas' %}" class="block py-2 px-3 rounded hover:bg-blue-700">📊 Estadísticas</a>
+        </nav>
+    </aside>
+
+    <!-- Contenido -->
+    <main class="flex-1 p-8">
+        <h1 class="text-3xl font-bold mb-6 text-gray-700">Gestión de Cursos</h1>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full text-sm">
+                <thead class="bg-blue-700 text-white">
+                    <tr>
+                        <th class="py-3 px-6 text-left">ID</th>
+                        <th class="py-3 px-6 text-left">Nombre</th>
+                        <th class="py-3 px-6 text-left">Profesor</th>
+                        <th class="py-3 px-6 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for curso in cursos %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-6">{{ curso.id }}</td>
+                        <td class="py-3 px-6">{{ curso.nombre }}</td>
+                        <td class="py-3 px-6">{{ curso.profesor.get_full_name }}</td>
+                        <td class="py-3 px-6 text-center space-x-2">
+                            <button class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Editar</button>
+                            <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-gray-500">No hay cursos registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

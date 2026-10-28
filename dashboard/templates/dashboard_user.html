@@ -1,0 +1,587 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Estudiante - EduConnect+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f4f9ff; font-family: 'Segoe UI', sans-serif; }
+
+    .sidebar {
+      height: 100vh;
+      background: #0d1b2a;
+      color: white;
+      padding: 20px;
+      min-width: 220px;
+    }
+    .sidebar h2 { font-size: 1.6rem; margin-bottom: 2rem; font-weight: 700; }
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+    .sidebar a:hover, .sidebar a.active { background: #0d6efd; }
+    .sidebar a.logout { background: #e63946; }
+    .sidebar a.logout:hover { background: #c1121f; }
+
+    .welcome-card {
+      background: linear-gradient(135deg, #6c63ff, #3f37c9);
+      color: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      font-weight: 500;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-4px); }
+    .stat-card h5 { margin-bottom: 10px; font-weight: 600; }
+    .stat-blue { border-top: 5px solid #0d6efd; }
+    .stat-green { border-top: 5px solid #2a9d8f; }
+    .stat-orange { border-top: 5px solid #f77f00; }
+    .stat-purple { border-top: 5px solid #9d4edd; }
+
+    .course-card { transition: 0.2s; }
+    .course-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+
+    .table thead th { background-color: #0d1b2a; color: white; }
+    .table tbody tr:hover { background-color: #e9f2ff; }
+
+    /* Estilos para el chat AI flotante - IGUAL AL PROFESOR */
+    .ai-chat-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+
+    .ai-chat-panel {
+        width: 380px;
+        height: 500px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        display: none;
+        flex-direction: column;
+        margin-bottom: 16px;
+    }
+
+    .ai-chat-panel.show {
+        display: flex !important;
+    }
+
+    .ai-chat-header {
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        color: white;
+        padding: 16px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ai-chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        background: #f8fafc;
+    }
+
+    .ai-chat-input-container {
+        padding: 16px;
+        border-top: 1px solid #e2e8f0;
+        background: white;
+    }
+
+    .chat-toggle-btn {
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        color: white;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: transform 0.2s;
+    }
+
+    .chat-toggle-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .message {
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 85%;
+        word-wrap: break-word;
+    }
+
+    .user-message {
+        background: #3b82f6;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+    }
+
+    .ai-message {
+        background: white;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .typing-indicator {
+        display: none;
+        padding: 8px 12px;
+        color: #64748b;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    .quick-btn {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        margin: 2px;
+    }
+
+    .progress-sm {
+        height: 6px;
+    }
+
+    /* Clases para las barras de progreso dinámicas */
+    .progress-bar-recursos {
+        width: 0%;
+        transition: width 1s ease-in-out;
+    }
+    
+    .progress-bar-tiempo {
+        width: 0%;
+        transition: width 1s ease-in-out;
+    }
+    
+    .progress-bar-logros {
+        width: 0%;
+        transition: width 1s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <!-- Sidebar para Estudiante -->
+    <div class="sidebar">
+      <h2>EduConnect</h2>
+      <a href="#" class="active">🏠 Dashboard</a>
+      <a href="{% url 'dashboard:cursos_disponibles' %}">📘 Cursos Disponibles</a>
+      <a href="{% url 'dashboard:mis_recursos' %}">📚 Mis Recursos</a>
+      <a href="{% url 'foros' %}">💬 Foros</a>
+      <a href="{% url 'dashboard:progreso' %}">📊 Mi Progreso</a>
+      <a href="{% url 'configuracion' %}">⚙️ Configuración</a>
+      <a href="{% url 'logout' %}" class="logout">🚪 Cerrar Sesión</a>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="p-4 flex-grow-1">
+
+      <!-- Mensajes -->
+      {% if messages %}
+        <div id="alert-container" class="position-relative">
+          {% for message in messages %}
+            <div class="alert alert-dismissible fade show 
+                        {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}" 
+                role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+        <script>
+          setTimeout(() => {
+            document.querySelectorAll('#alert-container .alert').forEach(el => el.remove());
+          }, 5000);
+        </script>
+      {% endif %}
+
+      <!-- Bienvenida para Estudiante -->
+      <div class="welcome-card">
+        <h2>👋 ¡Hola, {{ user.first_name|default:user.username }}!</h2>
+        <p>Bienvenido a tu panel de estudiante en EduConnect 🎓</p>
+        <div class="mt-3">
+          <span class="badge bg-light text-dark me-2">📚 
+            {{ user_cursos_count }} Cursos
+          </span>
+          <span class="badge bg-light text-dark me-2">✅ 
+            {{ recursos_completados }} Completados
+          </span>
+          <span class="badge bg-light text-dark">⏱️ 
+            {{ tiempo_estudio }}h Estudiadas
+          </span>
+        </div>
+      </div>
+
+      <!-- Estadísticas para Estudiante -->
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <div class="stat-card stat-blue">
+            <h5>Recursos Completados</h5>
+            <p class="display-6">{{ recursos_completados }}</p>
+            <small class="text-muted">Materiales revisados</small>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card stat-green">
+            <h5>Tiempo de Estudio</h5>
+            <p class="display-6">{{ tiempo_estudio }}h</p>
+            <small class="text-muted">Dedicación total</small>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card stat-orange">
+            <h5>Logros Obtenidos</h5>
+            <p class="display-6">{{ logros_obtenidos }}</p>
+            <small class="text-muted">Reconocimientos</small>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card stat-purple">
+            <h5>Recursos Nuevos</h5>
+            <p class="display-6">{{ recursos_nuevos }}</p>
+            <small class="text-muted">Por explorar</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cursos Inscritos -->
+      <h4 class="mt-4">📖 Mis Cursos Activos</h4>
+      <div class="row g-3 mt-2">
+        {% for curso in cursos_inscritos %}
+        <div class="col-md-6">
+          <div class="card course-card">
+            <div class="card-body">
+              <h5>{{ curso.curso.nombre }}</h5>
+              <p class="text-muted">📘 {{ curso.curso.categoria|default:"Sin categoría" }}</p>
+              <p><small>Profesor: {{ curso.curso.profesor.get_full_name|default:curso.curso.profesor.username }}</small></p>
+              
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="badge bg-success">Inscrito</span>
+                <a href="{% url 'dashboard:mis_recursos' %}" class="btn btn-primary btn-sm">Ver Materiales</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <div class="alert alert-warning">
+            <strong>📝 Aún no estás inscrito en ningún curso.</strong>
+            <a href="{% url 'dashboard:cursos_disponibles' %}" class="btn btn-outline-primary btn-sm ms-2">Explorar Cursos</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Progreso Reciente -->
+      <h4 class="mt-4">📈 Mi Progreso Reciente</h4>
+      <div class="row mt-2">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body">
+              <h6>Resumen de Actividad</h6>
+              <div class="mt-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Recursos Completados</span>
+                  <span>{{ recursos_completados }}</span>
+                </div>
+                <div class="progress progress-sm mb-3">
+                  <div class="progress-bar progress-bar-recursos" role="progressbar"></div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Tiempo de Estudio</span>
+                  <span>{{ tiempo_estudio }} horas</span>
+                </div>
+                <div class="progress progress-sm mb-3">
+                  <div class="progress-bar bg-success progress-bar-tiempo" role="progressbar"></div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Logros Obtenidos</span>
+                  <span>{{ logros_obtenidos }}</span>
+                </div>
+                <div class="progress progress-sm">
+                  <div class="progress-bar bg-warning progress-bar-logros" role="progressbar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h6>🎯 Próximas Metas</h6>
+              <div class="mt-3">
+                <p class="small">Completar {{ recursos_nuevos }} recursos nuevos</p>
+                <p class="small">Alcanzar {{ siguiente_logro }} logros</p>
+                <p class="small">Mejorar tu técnica de estudio</p>
+              </div>
+              <a href="{% url 'dashboard:cursos_disponibles' %}" class="btn btn-outline-primary btn-sm mt-2">Ver Más Cursos</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat AI Tutor - IGUAL AL PROFESOR PERO PARA ESTUDIANTE -->
+  <div class="ai-chat-container">
+    <div class="ai-chat-panel" id="aiChatPanel">
+      <div class="ai-chat-header">
+        <strong>🤖 EduConnect AI - Tutor Estudiantil</strong>
+        <button id="aiChatClose" class="btn btn-sm text-white">✕</button>
+      </div>
+      <div class="ai-chat-messages" id="aiChatMessages">
+        <div class="message ai-message">
+          ¡Hola <span id="ai-student-name">{{ user.first_name|default:"estudiante" }}</span>! Soy tu tutor AI especializado en aprendizaje. 
+          Veo que tienes <span id="ai-recursos-completados">{{ recursos_completados }}</span> recursos completados y <span id="ai-tiempo-estudio">{{ tiempo_estudio }}</span>h de estudio. 
+          ¿En qué puedo ayudarte con tus cursos o materiales de estudio?
+        </div>
+      </div>
+      <div class="typing-indicator" id="typingIndicator">
+        El tutor está escribiendo...
+      </div>
+      <div class="ai-chat-input-container">
+        <form id="aiChatForm" class="d-flex gap-2">
+          <input type="text" id="aiChatInput" class="form-control" 
+                 placeholder="Pregunta sobre cursos, estudio, materiales..." 
+                 autocomplete="off">
+          <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+        
+        <!-- Botones rápidos PARA ESTUDIANTE -->
+        <div class="mt-2 d-flex flex-wrap gap-1">
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Mis cursos</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Cómo estudiar</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Recursos</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Progreso</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Foros</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-btn">Tareas</button>
+        </div>
+      </div>
+    </div>
+    <button class="chat-toggle-btn" id="aiChatToggle">🤖</button>
+  </div>
+
+  <footer class="footer mt-4 text-center">
+    <p>&copy; 2025 EduConnect+. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Sistema de Chat AI para Estudiantes
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatToggle = document.getElementById('aiChatToggle');
+      const chatPanel = document.getElementById('aiChatPanel');
+      const chatClose = document.getElementById('aiChatClose');
+      const chatForm = document.getElementById('aiChatForm');
+      const chatInput = document.getElementById('aiChatInput');
+      const chatMessages = document.getElementById('aiChatMessages');
+      const typingIndicator = document.getElementById('typingIndicator');
+
+      // Datos del estudiante
+      const studentData = {
+        username: "{{ user.username }}",
+        firstName: "{{ user.first_name|default:'estudiante' }}",
+        cursosCount: parseInt("{{ user_cursos_count }}") || 0,
+        recursosCompletados: parseInt("{{ recursos_completados }}") || 0,
+        tiempoEstudio: parseInt("{{ tiempo_estudio }}") || 0,
+        logrosObtenidos: parseInt("{{ logros_obtenidos }}") || 0,
+        recursosNuevos: parseInt("{{ recursos_nuevos }}") || 0,
+        progresoRecursos: parseFloat("{{ progreso_recursos }}") || 0,
+        progresoTiempo: parseFloat("{{ progreso_tiempo }}") || 0,
+        progresoLogros: parseFloat("{{ progreso_logros }}") || 0
+      };
+
+      // Inicializar barras de progreso
+      function inicializarBarrasProgreso() {
+        setTimeout(() => {
+          const barRecursos = document.querySelector('.progress-bar-recursos');
+          const barTiempo = document.querySelector('.progress-bar-tiempo');
+          const barLogros = document.querySelector('.progress-bar-logros');
+          
+          if (barRecursos) {
+            barRecursos.style.width = studentData.progresoRecursos + '%';
+            barRecursos.setAttribute('aria-valuenow', studentData.progresoRecursos);
+            barRecursos.setAttribute('aria-valuemin', 0);
+            barRecursos.setAttribute('aria-valuemax', 100);
+          }
+          if (barTiempo) {
+            barTiempo.style.width = studentData.progresoTiempo + '%';
+            barTiempo.setAttribute('aria-valuenow', studentData.progresoTiempo);
+            barTiempo.setAttribute('aria-valuemin', 0);
+            barTiempo.setAttribute('aria-valuemax', 100);
+          }
+          if (barLogros) {
+            barLogros.style.width = studentData.progresoLogros + '%';
+            barLogros.setAttribute('aria-valuenow', studentData.progresoLogros);
+            barLogros.setAttribute('aria-valuemin', 0);
+            barLogros.setAttribute('aria-valuemax', 100);
+          }
+        }, 500);
+      }
+
+      // Respuestas inteligentes para ESTUDIANTES
+      const studentResponses = {
+        'cursos': `📘 Tienes ${studentData.cursosCount} cursos activos. Para ver todos los cursos disponibles, ve a "Cursos Disponibles" en el menú.`,
+        'estudiar': `🎯 Consejos de estudio: 1) Organiza tu tiempo 2) Toma descansos cada 45min 3) Practica regularmente 4) Participa en foros 5) Revisa el material completo`,
+        'recursos': `📚 Tienes ${studentData.recursosCompletados} recursos completados y ${studentData.recursosNuevos} nuevos por explorar. Ve a "Mis Recursos" para acceder a todo el material.`,
+        'progreso': `📊 Tu progreso: ${studentData.recursosCompletados} recursos vistos, ${studentData.tiempoEstudio}h de estudio, ${studentData.logrosObtenidos} logros. ¡Sigue así!`,
+        'foros': `💬 Los foros son perfectos para resolver dudas con profesores y compañeros. Participa activamente para mejorar tu aprendizaje.`,
+        'tareas': `📝 Revisa las tareas en cada curso. Organiza tus entregas y no dudes en pedir ayuda si necesitas apoyo.`,
+        'configuracion': `⚙️ Configura tu perfil en "Configuración". Puedes personalizar notificaciones y preferencias de estudio.`,
+        'default': `Puedo ayudarte con: tus cursos, técnicas de estudio, recursos disponibles, seguimiento de progreso y participación en foros. ¿En qué necesitas ayuda?`
+      };
+
+      // Toggle del chat
+      chatToggle.addEventListener('click', function() {
+        chatPanel.classList.toggle('show');
+        if (chatPanel.classList.contains('show')) {
+          chatInput.focus();
+        }
+      });
+
+      // Cerrar chat
+      chatClose.addEventListener('click', function() {
+        chatPanel.classList.remove('show');
+      });
+
+      // Enviar mensaje (conectado al backend con IA real)
+      async function pedirAlBackend(message) {
+        try {
+          const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+          const resp = await fetch("{% url 'dashboard:ai_chat_api' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf},
+            body: JSON.stringify({message: message})
+          });
+          const data = await resp.json();
+          return data.reply || 'No pude procesar tu pregunta, inténtalo de nuevo.';
+        } catch (e) {
+          return generateStudentResponse(message); // fallback local si falla la red
+        }
+      }
+
+      chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (message) {
+          addMessage(message, 'user');
+          chatInput.value = '';
+          showTypingIndicator();
+          const response = await pedirAlBackend(message);
+          hideTypingIndicator();
+          addMessage(response, 'ai');
+        }
+      });
+
+      // Tecla Enter para enviar
+      chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          chatForm.dispatchEvent(new Event('submit'));
+        }
+      });
+
+      // Botones rápidos PARA ESTUDIANTE (también van al backend)
+      document.querySelectorAll('.quick-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const message = btn.textContent;
+          addMessage(message, 'user');
+          showTypingIndicator();
+          const response = await pedirAlBackend(message);
+          hideTypingIndicator();
+          addMessage(response, 'ai');
+        });
+      });
+
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.textContent = text;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function showTypingIndicator() {
+        typingIndicator.style.display = 'block';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function hideTypingIndicator() {
+        typingIndicator.style.display = 'none';
+      }
+
+      function generateStudentResponse(userMessage) {
+        const messageLower = userMessage.toLowerCase();
+        
+        if (messageLower.includes('curso') || messageLower.includes('clase') || messageLower.includes('materia')) {
+          return studentResponses['cursos'];
+        } else if (messageLower.includes('estudiar') || messageLower.includes('aprender') || messageLower.includes('estudio')) {
+          return studentResponses['estudiar'];
+        } else if (messageLower.includes('recurso') || messageLower.includes('material') || messageLower.includes('contenido')) {
+          return studentResponses['recursos'];
+        } else if (messageLower.includes('progreso') || messageLower.includes('avance') || messageLower.includes('proceso')) {
+          return studentResponses['progreso'];
+        } else if (messageLower.includes('foro') || messageLower.includes('discusion') || messageLower.includes('pregunta')) {
+          return studentResponses['foros'];
+        } else if (messageLower.includes('tarea') || messageLower.includes('deber') || messageLower.includes('entrega')) {
+          return studentResponses['tareas'];
+        } else if (messageLower.includes('configurar') || messageLower.includes('ajuste') || messageLower.includes('perfil')) {
+          return studentResponses['configuracion'];
+        } else if (messageLower.includes('hola') || messageLower.includes('buenas')) {
+          return `👋 ¡Hola ${studentData.firstName}! Soy tu tutor AI. ¿En qué puedo ayudarte con tu aprendizaje hoy?`;
+        } else {
+          return studentResponses['default'];
+        }
+      }
+
+      // Cerrar chat al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        if (!chatPanel.contains(e.target) && !chatToggle.contains(e.target) && chatPanel.classList.contains('show')) {
+          chatPanel.classList.remove('show');
+        }
+      });
+
+      // Efectos visuales
+      chatToggle.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.1)';
+      });
+
+      chatToggle.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+      });
+
+      // Inicializar las barras de progreso
+      inicializarBarrasProgreso();
+    });
+  </script>
+</body>
+</html>

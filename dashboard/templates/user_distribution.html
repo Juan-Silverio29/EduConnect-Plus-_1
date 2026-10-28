@@ -1,0 +1,43 @@
+<!--Dashboard/templates/user_distribution.html-->
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">📊 Distribución de Usuarios en EduConnect</h2>
+    <div id="userChart" style="height:400px;"></div>
+</div>
+
+<!-- Pasar los datos como atributos de datos para evitar problemas de sintaxis -->
+<div id="chart-data" 
+     data-labels='{{ data.labels|safe }}' 
+     data-values='{{ data.values|safe }}'
+     style="display: none;">
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    // Obtener los datos del elemento HTML
+    const chartData = document.getElementById('chart-data');
+    const labels = JSON.parse(chartData.dataset.labels);
+    const values = JSON.parse(chartData.dataset.values);
+
+    // Crear el gráfico con los datos
+    const data = [{
+        values: values,
+        labels: labels,
+        type: 'pie',
+        textinfo: 'label+percent',
+        marker: {
+            colors: ['#1f77b4', '#2ca02c', '#ff7f0e']
+        }
+    }];
+
+    const layout = {
+        height: 400,
+        width: 600,
+        title: 'Distribución de Usuarios en EduConnect',
+        font: { size: 16 }
+    };
+
+    Plotly.newPlot('userChart', data, layout);
+</script>
+{% endblock %}

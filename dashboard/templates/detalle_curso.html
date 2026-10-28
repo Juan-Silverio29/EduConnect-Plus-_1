@@ -1,0 +1,237 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle del Curso - {{ curso.nombre }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { 
+      background: #f8faff; 
+      font-family: 'Segoe UI', sans-serif; 
+    }
+    .header { 
+      background: linear-gradient(135deg, #0d6efd, #4361ee); 
+      color: white; 
+      padding: 25px; 
+      border-radius: 10px; 
+      margin-bottom: 25px; 
+      text-align: center; 
+    }
+    .section-card { 
+      background: #fff; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+      padding: 25px; 
+      margin-bottom: 25px; 
+      border-left: 4px solid #0d6efd;
+    }
+    .btn-back { 
+      background: linear-gradient(45deg, #6c757d, #495057);
+      color: #fff; 
+      border: none; 
+      border-radius: 25px; 
+      padding: 10px 25px; 
+      text-decoration: none; 
+      transition: all 0.3s ease;
+      font-weight: 500;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .btn-back:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      color: #fff; 
+    }
+    table th { 
+      background: linear-gradient(135deg, #0d6efd, #4361ee);
+      color: white; 
+      text-align: center; 
+      font-weight: 600;
+    }
+    table td { 
+      text-align: center; 
+      vertical-align: middle; 
+    }
+    .badge-entregada { 
+      background: linear-gradient(45deg, #198754, #20c997);
+      color: white; 
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .badge-pendiente { 
+      background: linear-gradient(45deg, #fd7e14, #ff922b);
+      color: white; 
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .btn-entregar {
+      background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    .btn-entregar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+    }
+    .activity-card {
+      border-left: 4px solid #ffc107;
+    }
+    .task-card {
+      border-left: 4px solid #fd7e14;
+    }
+    .material-card {
+      border-left: 4px solid #0dcaf0;
+    }
+    .student-card {
+      border-left: 4px solid #198754;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+
+    <!-- Encabezado -->
+    <div class="header">
+      <h2 class="fw-bold">📘 {{ curso.nombre }}</h2>
+      <p class="lead mb-3">{{ curso.descripcion }}</p>
+      <span class="badge bg-light text-dark fs-6 p-2">🏷️ Categoría: {{ curso.categoria }}</span>
+    </div>
+
+    <!-- Solo mostrar para profesores -->
+    {% if user.is_staff or user.perfilusuario.is_teacher %}
+      <!-- Alumnos inscritos -->
+      {% if alumnos %}
+      <div class="section-card student-card">
+        <h4 class="fw-bold">👨‍🎓 Alumnos Inscritos</h4>
+        <table class="table table-striped mt-3 table-hover">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Correo Electrónico</th>
+              <th>Fecha de Inscripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inscripcion in alumnos %}
+            <tr>
+              <td class="fw-bold">{{ forloop.counter }}</td>
+              <td>{{ inscripcion.alumno.first_name }} {{ inscripcion.alumno.last_name }}</td>
+              <td>{{ inscripcion.alumno.email }}</td>
+              <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      <!-- Materiales del curso -->
+      {% if materiales %}
+      <div class="section-card material-card">
+        <h4 class="fw-bold">📂 Materiales del Curso</h4>
+        <ul class="list-group mt-2">
+          {% for mat in materiales %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="flex-grow-1">
+                <strong class="fs-6">{{ mat.titulo }}</strong>
+                {% if mat.descripcion %}
+                  <br><small class="text-muted">{{ mat.descripcion }}</small>
+                {% endif %}
+                <br><small class="text-muted">📅 Subido: {{ mat.fecha_subida|date:"d/m/Y H:i" }}</small>
+              </div>
+              <div class="ms-3">
+                {% if mat.archivo %}
+                  <a href="{{ mat.archivo.url }}" class="btn btn-primary btn-sm" target="_blank">
+                    📄 Descargar
+                  </a>
+                {% elif mat.enlace %}
+                  <a href="{{ mat.enlace }}" class="btn btn-info btn-sm" target="_blank">
+                    🔗 Ver Enlace
+                  </a>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    {% endif %}
+
+    <!-- Actividades del curso (para todos) -->
+    {% if actividades %}
+    <div class="section-card activity-card">
+      <h4 class="fw-bold">📚 Actividades del Curso</h4>
+      <ul class="list-group mt-2">
+        {% for act in actividades %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+              <strong class="fs-6">{{ act.titulo }}</strong>
+              <span class="badge bg-secondary ms-2">{{ act.tipo|title }}</span>
+              {% if act.descripcion %}
+                <br><small class="text-muted">{{ act.descripcion }}</small>
+              {% endif %}
+            </div>
+            {% if act.tipo == "tarea" %}
+              <a href="{% url 'dashboard:detalle_tarea' act.id %}" class="btn btn-warning btn-sm">
+                📋 Ver Tarea
+              </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Tareas del curso (para todos) -->
+    {% if tareas %}
+    <div class="section-card task-card">
+      <h4 class="fw-bold">📝 Tareas Pendientes</h4>
+      <ul class="list-group mt-2">
+        {% for tarea in tareas %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+              <strong class="fs-6">{{ tarea.titulo }}</strong>
+              <br>
+              <small class="text-muted">⏰ Fecha entrega: {{ tarea.fecha_entrega|date:"d/m/Y" }}</small>
+            </div>
+            <div class="ms-3">
+              {% if tarea.id in entregas_dict %}
+                <span class="badge-entregada">✅ Entregada</span>
+              {% else %}
+                <a href="{% url 'dashboard:entregar_tarea' tarea.id %}" class="btn-entregar btn-sm">
+                  📤 Entregar
+                </a>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Mensajes cuando no hay contenido -->
+    {% if not actividades and not tareas and not materiales and not alumnos %}
+    <div class="section-card text-center">
+      <h4 class="text-muted">📭 No hay contenido disponible</h4>
+      <p class="text-muted">Este curso aún no tiene actividades, tareas o materiales.</p>
+    </div>
+    {% endif %}
+
+    <!-- Botón volver -->
+    <div class="text-center mt-4 mb-5">
+      <a href="{{ url_volver }}" class="btn-back">
+        ⬅ Volver al Listado de Cursos
+      </a>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "username": "profesor_demo",
+      "email": "profesor@educonnect.com",
+      "is_staff": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$720000$demo$K8nZxB+H6q9yJ+jG90V8qUflYkptVZbMEnqXdzbEtE4=",
+      "first_name": "Luis",
+      "last_name": "Ramírez"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "username": "profesora_maria",
+      "email": "maria@educonnect.com",
+      "is_staff": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$720000$demo$K8nZxB+H6q9yJ+jG90V8qUflYkptVZbMEnqXdzbEtE4=",
+      "first_name": "María",
+      "last_name": "González"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "username": "alumno_juan",
+      "email": "juan@educonnect.com",
+      "is_staff": false,
+      "password": "pbkdf2_sha256$720000$demo$K8nZxB+H6q9yJ+jG90V8qUflYkptVZbMEnqXdzbEtE4=",
+      "first_name": "Juan",
+      "last_name": "Pérez"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "username": "alumna_sara",
+      "email": "sara@educonnect.com",
+      "is_staff": false,
+      "password": "pbkdf2_sha256$720000$demo$K8nZxB+H6q9yJ+jG90V8qUflYkptVZbMEnqXdzbEtE4=",
+      "first_name": "Sara",
+      "last_name": "López"
+    }
+  },
+  {
+    "model": "dashboard.perfilusuario",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "institucion": "Universidad Nacional de México",
+      "is_teacher": true
+    }
+  },
+  {
+    "model": "dashboard.perfilusuario",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "institucion": "Instituto Tecnológico de Monterrey",
+      "is_teacher": true
+    }
+  },
+  {
+    "model": "dashboard.perfilusuario",
+    "pk": 3,
+    "fields": {
+      "user": 3,
+      "institucion": "UNAM",
+      "is_teacher": false
+    }
+  },
+  {
+    "model": "dashboard.perfilusuario",
+    "pk": 4,
+    "fields": {
+      "user": 4,
+      "institucion": "IPN",
+      "is_teacher": false
+    }
+  },
+  {
+    "model": "dashboard.curso",
+    "pk": 1,
+    "fields": {
+      "nombre": "Introducción a Python",
+      "descripcion": "Curso básico de programación en Python.",
+      "categoria": "Programación",
+      "profesor": 1,
+      "fecha_creacion": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "dashboard.curso",
+    "pk": 2,
+    "fields": {
+      "nombre": "Matemáticas para Ingenieros",
+      "descripcion": "Álgebra lineal, cálculo y ecuaciones diferenciales.",
+      "categoria": "Matemáticas",
+      "profesor": 2,
+      "fecha_creacion": "2025-02-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "dashboard.materialdidactico",
+    "pk": 1,
+    "fields": {
+      "curso": 1,
+      "profesor": 1,
+      "titulo": "Guía de variables y tipos de datos",
+      "descripcion": "Archivo PDF con ejemplos básicos.",
+      "tipo": "PDF",
+      "enlace": "https://www.python.org/",
+      "fecha_subida": "2025-02-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "dashboard.materialdidactico",
+    "pk": 2,
+    "fields": {
+      "curso": 2,
+      "profesor": 2,
+      "titulo": "Ejercicios de derivadas",
+      "descripcion": "Ejercicios resueltos paso a paso.",
+      "tipo": "PDF",
+      "enlace": "https://www.khanacademy.org/",
+      "fecha_subida": "2025-03-01T10:00:00Z"
+    }
+  },
+ {
+  "model": "dashboard.evaluacion",
+  "pk": 1,
+  "fields": {
+    "profesor": 1,
+    "curso": 1,
+    "nombre": "Examen de Sintaxis",
+    "descripcion": "Primera evaluación del curso.",
+    "fecha": "2025-03-10",
+    "creada_en": "2025-03-01T10:00:00Z",
+    "materiales": [1]
+  }
+},
+  {
+    "model": "dashboard.inscripcion",
+    "pk": 1,
+    "fields": {
+      "alumno": 3,
+      "curso": 1,
+      "fecha_inscripcion": "2025-03-05T10:00:00Z"
+    }
+  },
+  {
+    "model": "dashboard.inscripcion",
+    "pk": 2,
+    "fields": {
+      "alumno": 4,
+      "curso": 2,
+      "fecha_inscripcion": "2025-03-05T10:00:00Z"
+    }
+  }
+]

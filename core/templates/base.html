@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>EduConnect Plus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Estilos para el chat AI -->
+    <style>
+        /* Estilos para el chat AI */
+        #edu-ai-chat {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1050;
+        }
+
+        #edu-ai-toggle {
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        #edu-ai-panel {
+            display: none;
+            width: 384px;
+            height: 512px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            overflow: hidden;
+            flex-direction: column;
+            margin-bottom: 16px;
+        }
+
+        #edu-ai-panel.show {
+            display: flex !important;
+        }
+
+        #edu-ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+
+        .user-message {
+            background: #3b82f6;
+            color: white;
+            margin-left: auto;
+        }
+
+        .ai-message {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        #edu-ai-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        #edu-ai-input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">EduConnect-Plus</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard/">📊 Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/forum/">💬 Foro</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/resources/">📚 Recursos</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido dinámico -->
+    <div class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <p class="mb-0">&copy; 2025 EduConnect Plus - Todos los derechos reservados</p>
+    </footer>
+
+    <!-- Chat AI Tutor -->
+    <div id="edu-ai-chat">
+        <div id="edu-ai-panel">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <strong>EduConnect AI Tutor</strong>
+                <button id="edu-ai-close" class="btn btn-sm">✕</button>
+            </div>
+            <div id="edu-ai-messages">
+                <div class="message ai-message">
+                    ¡Hola! Soy tu tutor AI. ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+            <div class="p-3 border-top">
+                <form id="edu-ai-form">
+                    <input id="edu-ai-input" type="text" class="form-control" placeholder="Escribe tu pregunta...">
+                </form>
+            </div>
+        </div>
+        <button id="edu-ai-toggle">🤖</button>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript para el chat AI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('edu-ai-toggle');
+            const closeBtn = document.getElementById('edu-ai-close');
+            const chatPanel = document.getElementById('edu-ai-panel');
+            const chatForm = document.getElementById('edu-ai-form');
+            const chatInput = document.getElementById('edu-ai-input');
+            const chatMessages = document.getElementById('edu-ai-messages');
+
+            // Toggle del chat
+            toggleBtn.addEventListener('click', function() {
+                chatPanel.classList.toggle('show');
+            });
+
+            // Cerrar chat
+            closeBtn.addEventListener('click', function() {
+                chatPanel.classList.remove('show');
+            });
+
+            // Enviar mensaje
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const message = chatInput.value.trim();
+                
+                if (message) {
+                    // Agregar mensaje del usuario
+                    addMessage(message, 'user');
+                    chatInput.value = '';
+                    
+                    // Simular respuesta del AI (aquí integrarías tu API real)
+                    setTimeout(() => {
+                        addMessage('Esta es una respuesta simulada del tutor AI. En una implementación real, aquí se conectaría a una API de IA.', 'ai');
+                    }, 1000);
+                }
+            });
+
+            function addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                messageDiv.textContent = text;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>

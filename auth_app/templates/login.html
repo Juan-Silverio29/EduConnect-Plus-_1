@@ -1,0 +1,277 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Iniciar Sesión - EduConnect+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0d6efd, #00b4d8);
+    }
+    .login-card {
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      width: 100%;
+      max-width: 380px;
+    }
+    .login-title {
+      font-weight: 600;
+      color: #0d6efd;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .form-control { 
+      border-radius: 10px; 
+      padding: 12px; 
+      border: 1px solid #dee2e6;
+    }
+    .form-control:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    .btn-login {
+      background: #0d6efd;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+    .btn-login:hover { 
+      background: #004aad; 
+      transform: scale(1.02); 
+    }
+    .btn-login:disabled {
+      background: #6c757d;
+      transform: none;
+      cursor: not-allowed;
+    }
+    .footer-text { 
+      text-align: center; 
+      font-size: 14px; 
+      margin-top: 15px; 
+      color: #6c757d; 
+    }
+    .footer-text a { 
+      color: #0d6efd; 
+      text-decoration: none; 
+      font-weight: 500; 
+    }
+    .footer-text a:hover { 
+      text-decoration: underline; 
+    }
+    .alert { 
+      display: none; 
+      margin-bottom: 15px; 
+      border-radius: 10px;
+    }
+    footer { 
+      width: 100%; 
+      text-align: center; 
+      margin-top: 20px; 
+      color: #fff; 
+    }
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h2 class="login-title">EduConnect+</h2>
+
+    <div id="login-alert" class="alert alert-danger"></div>
+
+    <form id="login-form">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="username" class="form-label">Usuario</label>
+        <input type="text" id="username" class="form-control" placeholder="Ingresa tu usuario" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password" id="password" class="form-control" placeholder="Ingresa tu contraseña" required>
+      </div>
+      <button type="submit" class="btn-login" id="login-btn">
+        Iniciar Sesión
+      </button>
+    </form>
+
+    <p class="footer-text mt-3">
+      ¿No tienes cuenta? <a href="{% url 'register' %}">Regístrate aquí</a>
+    </p>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 EduConnect+. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- ✅ JAVASCRIPT MEJORADO -->
+  <script>
+    // ✅ FUNCIÓN PARA OBTENER CSRF TOKEN (más robusta)
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    // ✅ FUNCIÓN PRINCIPAL MEJORADA
+    async function handleLogin(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const alertBox = document.getElementById("login-alert");
+      const loginBtn = document.getElementById("login-btn");
+      
+      // Validaciones básicas
+      if (!username || !password) {
+        showAlert('Por favor ingresa usuario y contraseña', 'danger');
+        return;
+      }
+
+      // Mostrar loading
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verificando...';
+      alertBox.style.display = "none";
+
+      try {
+        const response = await fetch("{% url 'api_login_session' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          body: JSON.stringify({ 
+            username: username, 
+            password: password 
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          // Manejar diferentes tipos de error
+          if (response.status === 429) {
+            showAlert('🚫 Cuenta bloqueada temporalmente. Demasiados intentos fallidos. Espera 30 minutos.', 'danger');
+          } else if (response.status === 400) {
+            showAlert(data.error || 'Usuario o contraseña incorrectos', 'danger');
+          } else {
+            showAlert('Error del servidor. Intenta más tarde.', 'danger');
+          }
+        } else {
+          // ✅ Login exitoso
+          showAlert('✅ ¡Login exitoso! Redirigiendo...', 'success');
+          
+          // Guardar tokens en localStorage
+          if (data.access) localStorage.setItem("access", data.access);
+          if (data.refresh) localStorage.setItem("refresh", data.refresh);
+          
+          // Redirección según rol después de 1.5 segundos
+          setTimeout(() => {
+            redirectByRole(data.rol);
+          }, 1500);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert('❌ Error de conexión. Verifica tu internet.', 'danger');
+      } finally {
+        // Restaurar botón
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Iniciar Sesión';
+      }
+    }
+
+    // ✅ FUNCIÓN PARA MOSTRAR ALERTAS
+    function showAlert(message, type) {
+      const alertBox = document.getElementById("login-alert");
+      alertBox.textContent = message;
+      alertBox.className = `alert alert-${type}`;
+      alertBox.style.display = "block";
+      
+      // Auto-ocultar después de 5 segundos (excepto para éxito)
+      if (type !== 'success') {
+        setTimeout(() => {
+          alertBox.style.display = "none";
+        }, 5000);
+      }
+    }
+
+    // ✅ FUNCIÓN PARA REDIRIGIR SEGÚN ROL
+    function redirectByRole(rol) {
+      switch(rol) {
+        case "admin":
+          window.location.href = "/admin/";
+          break;
+        case "profesor":
+          window.location.href = "{% url 'dashboard_profesor' %}";
+          break;
+        case "estudiante":
+          window.location.href = "{% url 'dashboard_user' %}";
+          break;
+        default:
+          window.location.href = "{% url 'dashboard_user' %}";
+      }
+    }
+
+    // ✅ EVENT LISTENERS
+    document.getElementById("login-form").addEventListener("submit", handleLogin);
+
+    // Limpiar alerta cuando el usuario empiece a escribir
+    document.getElementById("username").addEventListener("input", function() {
+      document.getElementById("login-alert").style.display = "none";
+    });
+
+    document.getElementById("password").addEventListener("input", function() {
+      document.getElementById("login-alert").style.display = "none";
+    });
+
+    // Permitir enviar con Enter en el campo de contraseña
+    document.getElementById("password").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleLogin(event);
+      }
+    });
+
+    // ✅ VERIFICAR SI YA ESTÁ AUTENTICADO
+    document.addEventListener('DOMContentLoaded', function() {
+      // Si hay tokens, verificar si puede redirigir automáticamente
+      const accessToken = localStorage.getItem("access");
+      if (accessToken) {
+        console.log("Token encontrado, verificando validez...");
+        // Podrías agregar aquí una verificación del token
+      }
+    });
+  </script>
+</body>
+</html>

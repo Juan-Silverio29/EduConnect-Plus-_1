@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Progreso - EduConnect+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+        min-height: 100vh;
+        background: #1a2537;
+        padding: 25px;
+        color: #fff;
+    }
+
+    .sidebar a {
+        display: block;
+        padding: 10px 5px;
+        margin-bottom: 10px;
+        color: #d7d7d7;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: 0.2s ease;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+        background: #0d6efd;
+        color: #fff;
+    }
+
+    /* ===== CARDS ESTADÍSTICAS ===== */
+    .stat-card {
+        padding: 20px;
+        border-radius: 12px;
+        color: #fff;
+    }
+
+    .stat-blue { background: #0d6efd; }
+    .stat-green { background: #198754; }
+    .stat-orange { background: #fd7e14; }
+    .stat-purple { background: #6f42c1; }
+
+    .card {
+        border-radius: 12px;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-bar-dynamic {
+        width: calc(var(--progreso) * 1%);
+    }
+
+    /* ===== BOTÓN VOLVER ===== */
+    .btn-volver {
+        background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+    }
+
+    .btn-volver:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+        color: white;
+    }
+
+    /* ===== HOVER EFFECT PARA CARDS ===== */
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+
+
+
+        <!-- Contenido principal -->
+        <main class="col-md-9 p-4">
+
+            <!-- Header con botón volver -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">📊 Mi Progreso Académico</h2>
+                <a href="{% url 'dashboard:dashboard_user' %}" class="btn btn-volver">
+                    ← Volver al Dashboard
+                </a>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="row mt-4 g-3">
+
+                <div class="col-md-3">
+                    <div class="stat-card stat-blue">
+                        <h6>Cursos inscritos</h6>
+                        <p class="display-6">{{ user_cursos_count }}</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="stat-card stat-green">
+                        <h6>Recursos completados</h6>
+                        <p class="display-6">{{ recursos_completados }}</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="stat-card stat-orange">
+                        <h6>Horas de estudio</h6>
+                        <p class="display-6">{{ tiempo_estudio }}h</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="stat-card stat-purple">
+                        <h6>Logros obtenidos</h6>
+                        <p class="display-6">{{ logros_obtenidos }}</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Progreso por curso -->
+            <h4 class="mt-5 fw-bold">📖 Progreso por Curso</h4>
+
+            <div class="row g-3 mt-2">
+                {% for inscripcion in cursos_inscritos %}
+                <div class="col-md-6">
+                    <a href="{% url 'dashboard:detalle_curso' inscripcion.curso.id %}" style="text-decoration: none; color: inherit;">
+                        <div class="card shadow-sm hover-shadow">
+                            <div class="card-body">
+
+                                <h5 class="fw-bold">{{ inscripcion.curso.nombre }}</h5>
+                                <p class="text-muted mb-2">
+                                    {{ inscripcion.curso.categoria|default:"Sin categoría" }}
+                                </p>
+
+                                <!-- Barra de progreso -->
+                                <div class="progress mb-2" style="height: 10px;">
+                                    <div class="progress-bar bg-primary progress-bar-dynamic"
+                                        role="progressbar"
+                                        style="--progreso: {{ inscripcion.progreso }};"
+                                        aria-valuenow="{{ inscripcion.progreso }}"
+                                        aria-valuemin="0"
+                                        aria-valuemax="100">
+                                    </div>
+                                </div>
+
+                                <small class="text-muted">Progreso: {{ inscripcion.progreso }}%</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        No estás inscrito en ningún curso.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ============================= -->
+            <!-- 🏆 INSIGNIAS -->
+            <!-- ============================= -->
+            <div class="mt-4">
+                <h4 class="fw-bold mb-3">🏆 Mis Insignias
+                    <small class="text-muted fs-6">({{ insignias_obtenidas|length }} de {{ insignias_obtenidas|length|add:insignias_bloqueadas|length }})</small>
+                </h4>
+                <div class="row g-3">
+                    {% for ins in insignias_obtenidas %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card text-center h-100 border-warning">
+                            <div class="card-body">
+                                <div style="font-size: 2.2rem;">{{ ins.nombre|slice:":2" }}</div>
+                                <h6 class="fw-bold mt-2 mb-1">{{ ins.nombre|slice:"2" }}{{ ins.nombre|slice:"2:" }}</h6>
+                                <small class="text-muted">{{ ins.descripcion }}</small>
+                                <div class="badge bg-success mt-2">Desbloqueada</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-warning text-center mb-0">
+                            Aún no tienes insignias. ¡Inscríbete a un curso o entrega una tarea para desbloquear la primera!
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% for ins in insignias_bloqueadas %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card text-center h-100 bg-light" style="opacity: 0.55;">
+                            <div class="card-body">
+                                <div style="font-size: 2.2rem; filter: grayscale(1);">🔒</div>
+                                <h6 class="fw-bold mt-2 mb-1 text-muted">{{ ins.nombre }}</h6>
+                                <small class="text-muted">{{ ins.descripcion }}</small>
+                                <div class="badge bg-secondary mt-2">Bloqueada</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+</div>
+
+{% endblock %}
