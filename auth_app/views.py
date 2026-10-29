@@ -143,11 +143,13 @@ def register_view(request):
         )
 
         # Crear perfil y mantener sincronizado el rol
-        PerfilUsuario.objects.create(
+        PerfilUsuario.objects.update_or_create(
             user=user,
-            institucion=institucion if institucion else None,
-            foto_perfil="img/default_user.png",
-            is_teacher=es_profesor,
+            defaults={
+                'institucion': institucion if institucion else None,
+                'foto_perfil': 'img/default_user.png',
+                'is_teacher': es_profesor,
+            },
         )
 
         # Iniciar sesión automáticamente
@@ -282,13 +284,15 @@ def api_register_session(request):
         )
 
         # Crear perfil (SOLO UNA VEZ)
-        PerfilUsuario.objects.create(
+        PerfilUsuario.objects.update_or_create(
             user=user,
-            institucion=institucion if institucion else None,
-            alias=alias,
-            semestre=semestre if semestre else None,
-            is_teacher=(rol == "profesor"),
-            foto_perfil="img/default_user.png"
+            defaults={
+                'institucion': institucion if institucion else None,
+                'alias': alias,
+                'semestre': semestre if semestre else None,
+                'is_teacher': (rol == "profesor"),
+                'foto_perfil': 'img/default_user.png',
+            },
         )
 
         # ✅ SOLUCIÓN: Especificar el backend manualmente antes del login

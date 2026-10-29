@@ -36,13 +36,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.is_staff = es_profesor
         user.save()
 
-        PerfilUsuario.objects.create(
+        PerfilUsuario.objects.update_or_create(
             user=user,
-            institucion=institucion,
-            alias=alias,
-            semestre=semestre,
-            foto_perfil="img/default_user.png",
-            is_teacher=es_profesor,
+            defaults={
+                'institucion': institucion,
+                'alias': alias,
+                'semestre': semestre,
+                'foto_perfil': 'img/default_user.png',
+                'is_teacher': es_profesor,
+            },
         )
 
         return user

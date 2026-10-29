@@ -26,10 +26,12 @@ for u in usuarios:
             is_superuser=u["is_superuser"],
             is_staff=u["is_staff"]
         )
-        PerfilUsuario.objects.create(
+        PerfilUsuario.objects.update_or_create(
             user=user,
-            institucion="Institución X",
-            is_teacher=(not u["is_superuser"] and u["is_staff"]),
+            defaults={
+                'institucion': 'Institución X',
+                'is_teacher': (not u["is_superuser"] and u["is_staff"]),
+            },
         )
         print(f"Usuario {u['username']} creado.")
 
