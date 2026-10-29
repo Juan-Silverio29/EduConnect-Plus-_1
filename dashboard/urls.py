@@ -20,7 +20,7 @@ urlpatterns = [
     # Profesor - Cursos
     path('profesor/cursos/', views.profesor_cursos, name='profesor_cursos'),
     path('profesor/crear-curso/', views.crear_curso, name='crear_curso'),
-    path('profesor/curso/<int:curso_id>/', views.detalle_curso, name='detalle_curso'),
+    path('profesor/curso/<int:curso_id>/', views.detalle_curso, name='detalle_curso_profesor'),
     path('profesor/editar-curso/<int:curso_id>/', views.editar_curso, name='editar_curso'),
 
     # Profesor - Evaluaciones
@@ -43,7 +43,7 @@ urlpatterns = [
     # Alumno
     path('alumno/cursos-disponibles/', views.cursos_disponibles, name='cursos_disponibles'),
     path('alumno/inscribirse/<int:curso_id>/', views.inscribirse_curso, name='inscribirse_curso'),
-    path('curso/<int:curso_id>/', views.detalle_curso, name='detalle_curso'),
+    path('curso/<int:curso_id>/', views.detalle_curso, name='detalle_curso_alumno'),
 
     # 🟩 ESTA ES LA ÚNICA RUTA CORRECTA PARA MIS RECURSOS
     path('alumno/mis-recursos/', views.mis_recursos, name='mis_recursos'),

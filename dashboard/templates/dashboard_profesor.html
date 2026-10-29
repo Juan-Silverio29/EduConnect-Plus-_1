@@ -251,7 +251,7 @@
               <p><small>📅 Creado: {{ curso.fecha_creacion|date:"d/m/Y" }}</small></p>
               
               {% if curso.id %}
-                <a href="{% url 'dashboard:detalle_curso' curso.id %}" class="btn btn-primary btn-sm mt-2">Gestionar Curso</a>
+                <a href="{% url 'dashboard:detalle_curso_profesor' curso.id %}" class="btn btn-primary btn-sm mt-2">Gestionar Curso</a>
               {% else %}
                 <span class="btn btn-secondary btn-sm mt-2" disabled>Curso no disponible</span>
               {% endif %}

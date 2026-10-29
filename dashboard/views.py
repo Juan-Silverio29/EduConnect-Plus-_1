@@ -29,7 +29,7 @@ from .models import (
     Tarea, EntregaTarea
 )
 
-from auth_app.models import PerfilUsuario
+from auth_app.models import PerfilUsuario, user_es_profesor
 from forum.models import Foro
 from dashboard.models import UserActivity, LearningSession
 from .models import Curso, Inscripcion, MaterialDidactico, Evaluacion
@@ -107,7 +107,7 @@ def dashboard_view(request):
     user = request.user
     if user.is_superuser:
         return redirect('dashboard:dashboard_admin')
-    elif user.is_staff or (hasattr(user, 'perfilusuario') and getattr(user.perfilusuario, 'is_teacher', False)):
+    elif user_es_profesor(user):
         return redirect('dashboard:dashboard_profesor')
     else:
         return redirect('dashboard:dashboard_user')
@@ -518,7 +518,7 @@ def inscribirse_curso(request, curso_id):
         if insignia:
             messages.success(request, f"🏆 ¡Nueva insignia desbloqueada: {insignia['nombre']}!")
     messages.success(request, f"✅ Te has inscrito en {curso.nombre}.")
-    return redirect('dashboard:detalle_curso', curso_id=curso.id)
+    return redirect('dashboard:detalle_curso_alumno', curso_id=curso.id)
 
 @login_required
 def mis_recursos(request):
@@ -550,13 +550,14 @@ def detalle_curso(request, curso_id):
     # Actividades y tareas del curso
     actividades = Actividad.objects.filter(curso=curso)
     tareas = Tarea.objects.filter(curso=curso)
-    
+
     # Entregas del usuario (solo para marcar si la tarea ya fue entregada)
     entregas_qs = EntregaTarea.objects.filter(alumno=request.user, tarea__curso=curso)
     entregas_dict = {entrega.tarea.id: entrega for entrega in entregas_qs}
 
-    # Solo si es profesor
-    if hasattr(request.user, "perfilusuario") and getattr(request.user.perfilusuario, "is_teacher", False):
+    # Unificamos la lógica de roles para evitar el drift entre profesor y alumno.
+    es_profesor = user_es_profesor(request.user)
+    if es_profesor:
         materiales = MaterialDidactico.objects.filter(curso=curso)
         alumnos = Inscripcion.objects.filter(curso=curso).select_related('alumno')
         url_volver = reverse('dashboard:profesor_cursos')
@@ -569,7 +570,7 @@ def detalle_curso(request, curso_id):
         "curso": curso,
         "actividades": actividades,
         "tareas": tareas,
-        "entregas_dict": entregas_dict,  # 🔹 Esto es clave para mostrar entregas
+        "entregas_dict": entregas_dict,
         "materiales": materiales,
         "alumnos": alumnos,
         "url_volver": url_volver
