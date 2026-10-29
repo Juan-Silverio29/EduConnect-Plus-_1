@@ -9,10 +9,15 @@ from .permissions import ROLES
 
 @receiver(post_save, sender=User)
 def ensure_user_profile(sender, instance, created, **kwargs):
-    """Garantiza que un usuario siempre tenga PerfilUsuario asociado."""
-    if not instance:
+    """Garantiza que un usuario siempre tenga PerfilUsuario asociado.
+
+    Solo actúa al crear el User (created=True). No sobrescribe is_teacher
+    en updates posteriores (last_login, refresh_from_db, etc.), que antes
+    pisaban el valor establecido explícitamente.
+    """
+    if not instance or not created:
         return
-    PerfilUsuario.objects.update_or_create(
+    PerfilUsuario.objects.get_or_create(
         user=instance,
         defaults={
             'is_teacher': bool(getattr(instance, 'is_staff', False)),

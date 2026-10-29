@@ -1,4 +1,5 @@
 # auth_app/views.py
+import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -94,7 +95,6 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            print(f"[DEBUG] Usuario autenticado correctamente: {user.username}")
             if user.is_superuser:
                 return redirect("/admin/")
             elif user_es_profesor(user):

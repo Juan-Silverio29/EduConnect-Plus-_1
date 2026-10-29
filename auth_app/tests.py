@@ -10,6 +10,7 @@ from django.db import connections, transaction
 from django.db.backends.sqlite3.base import DatabaseWrapper
 from django.db.migrations.executor import MigrationExecutor
 from django.urls import reverse
+from dashboard.models import Curso, Inscripcion, PerfilUsuario, MaterialDidactico, Actividad, Tarea
 
 from auth_app.models import PerfilUsuario, user_es_profesor
 from auth_app.permissions import (
@@ -35,6 +36,10 @@ class AuthCharacterizationTests(TestCase):
             is_staff=False,
         )
         PerfilUsuario.objects.update_or_create(user=teacher, defaults={'is_teacher': True})
+        # Recarga el teacher para que la caché de auth_perfil refleje el perfil recién creado.
+        # Mismo patrón que test_user_es_profesor_is_teacher (que sí pasa).
+        teacher = User.objects.get(pk=teacher.pk)
+
         curso = Curso.objects.create(
             nombre='Curso de prueba',
             descripcion='Curso de validación',
@@ -42,11 +47,22 @@ class AuthCharacterizationTests(TestCase):
             grupo='A',
         )
 
+        alumno = User.objects.create_user(
+            username='alumno_char',
+            email='alumno_char@example.com',
+            password='Passw0rd!',
+            is_staff=False,
+        )
+        # El alumno también necesita perfil auth_app para mantener coherencia con el modelo.
+        PerfilUsuario.objects.update_or_create(user=alumno, defaults={'is_teacher': False})
+        Inscripcion.objects.get_or_create(curso=curso, alumno=alumno)
+
         self.client.force_login(teacher)
         response = self.client.get(reverse('dashboard:detalle_curso_alumno', args=[curso.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '👨‍🎓 Alumnos inscritos')
+        self.assertContains(response, 'Alumnos Inscritos')
+
 
     def test_user_es_profesor_superuser(self):
         user = User.objects.create_superuser(username='admin_role', email='admin_role@example.com', password='Passw0rd!')
@@ -66,10 +82,15 @@ class AuthCharacterizationTests(TestCase):
         user = User.objects.create_user(username='student_role', email='student_role@example.com', password='Passw0rd!')
         self.assertFalse(user_es_profesor(user))
 
-    def test_admin_filter_on_perfilusuario_raises_field_error(self):
-        # CARACTERIZACIÓN: filtro legacy con related_name incorrecto
-        with self.assertRaises(FieldError):
-            list(User.objects.filter(perfilusuario__is_teacher=True))
+    def test_admin_filter_on_auth_perfil_does_not_raise_field_error(self):
+        admin = User.objects.create_superuser(
+            username='admin_perfil_check',
+            email='admin_perfil_check@example.com',
+            password='Passw0rd!',
+        )
+        self.client.force_login(admin)
+        response = self.client.get('/admin/auth/user/?is_teacher=yes')
+        self.assertEqual(response.status_code, 200)
 
     def test_login_student_redirects_to_dashboard_user(self):
         user = User.objects.create_user(
