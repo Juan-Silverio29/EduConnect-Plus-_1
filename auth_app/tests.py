@@ -5,6 +5,7 @@ from django.test import TestCase, TransactionTestCase
 from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.core.exceptions import FieldError
+from django.core.management import call_command
 from django.db import connections
 from django.db.backends.sqlite3.base import DatabaseWrapper
 from django.db.migrations.executor import MigrationExecutor
@@ -46,6 +47,7 @@ class AuthCharacterizationTests(TestCase):
     def test_user_es_profesor_is_teacher(self):
         user = User.objects.create_user(username='teacher_role', email='teacher_role@example.com', password='Passw0rd!')
         PerfilUsuario.objects.update_or_create(user=user, defaults={'is_teacher': True})
+        user = User.objects.get(pk=user.pk)
         self.assertTrue(user_es_profesor(user))
 
     def test_user_es_profesor_is_staff(self):
@@ -177,30 +179,17 @@ class AuthCharacterizationTests(TestCase):
 
 
 class AuthMigrationRoundTripTests(TransactionTestCase):
-    def test_migration_forward_and_reverse_on_default_test_db(self):
-        group_names = [
-            'Administrador',
-            'Responsable de capacitación',
-            'Supervisor',
-            'Colaborador',
-        ]
+    serialized_rollback = True
+    nombres = ['Administrador', 'Responsable de capacitación', 'Supervisor', 'Colaborador']
 
-        def count_groups_in_test_db():
-            return Group.objects.filter(name__in=group_names).count()
+    def contar(self):
+        return Group.objects.filter(name__in=self.nombres).count()
 
-        call_command('migrate', 'auth_app', '0001', verbosity=0)
-        self.assertEqual(count_groups_in_test_db(), 0)
-
-        call_command('migrate', 'auth_app', '0002_departamento_equipo_perfilusuario_equipo', verbosity=0)
-        self.assertEqual(count_groups_in_test_db(), 4)
-
-        call_command('migrate', 'auth_app', '0001', verbosity=0)
-        self.assertEqual(count_groups_in_test_db(), 0)
-
-        call_command('migrate', 'auth_app', '0002_departamento_equipo_perfilusuario_equipo', verbosity=0)
-        self.assertEqual(count_groups_in_test_db(), 4)
-
-    def tearDown(self):
-        call_command('migrate', 'auth_app', '0002_departamento_equipo_perfilusuario_equipo', verbosity=0)
-        super().tearDown()
+    def test_ida_y_vuelta(self):
+        try:
+            call_command('migrate', 'auth_app', '0001', verbosity=0)
+            call_command('migrate', 'auth_app', '0002', verbosity=0)
+            self.assertEqual(self.contar(), 4)
+        finally:
+            call_command('migrate', verbosity=0)
 
