@@ -31,3 +31,6 @@ server_edu.pem
 # Sistema
 .DS_Store
 Thumbs.db
+
+salida.txt
+tmp_test_output.txt

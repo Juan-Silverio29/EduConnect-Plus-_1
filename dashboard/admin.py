@@ -151,9 +151,9 @@ class IsTeacherFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'yes':
-            return queryset.filter(perfilusuario__is_teacher=True)
+            return queryset.filter(auth_perfil__is_teacher=True)
         if self.value() == 'no':
-            return queryset.filter(perfilusuario__is_teacher=False)
+            return queryset.filter(auth_perfil__is_teacher=False)
         return queryset
 
 # --------------------------
