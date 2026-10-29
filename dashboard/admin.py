@@ -175,7 +175,7 @@ class PerfilUsuarioInline(admin.StackedInline):
 class CustomUserAdmin(admin.ModelAdmin):
     inlines = (PerfilUsuarioInline,)
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_teacher', 'institucion', 'foto_preview')
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'perfilusuario__institucion')
+    search_fields = ('username', 'email', 'first_name', 'last_name', 'auth_perfil__institucion')
     
     # CORRECCIÓN: Usar el filtro personalizado en lugar de 'perfilusuario__is_teacher'
     list_filter = ('is_staff', 'is_superuser', IsTeacherFilter, 'date_joined')
@@ -183,17 +183,17 @@ class CustomUserAdmin(admin.ModelAdmin):
     readonly_fields = ('date_joined', 'last_login')
 
     def is_teacher(self, obj):
-        return obj.perfilusuario.is_teacher if hasattr(obj, 'perfilusuario') else False
+        return obj.auth_perfil.is_teacher if hasattr(obj, 'auth_perfil') else False
     is_teacher.boolean = True
     is_teacher.short_description = 'Profesor'
 
     def institucion(self, obj):
-        return obj.perfilusuario.institucion if hasattr(obj, 'perfilusuario') else "-"
+        return obj.auth_perfil.institucion if hasattr(obj, 'auth_perfil') else "-"
     institucion.short_description = "Institución"
 
     def foto_preview(self, obj):
-        if hasattr(obj, 'perfilusuario') and obj.perfilusuario.foto_perfil:
-            return format_html('<img src="{}" width="50" style="border-radius:50%;"/>', obj.perfilusuario.foto_perfil.url)
+        if hasattr(obj, 'auth_perfil') and obj.auth_perfil.foto_perfil:
+            return format_html('<img src="{}" width="50" style="border-radius:50%;"/>', obj.auth_perfil.foto_perfil.url)
         return "-"
     foto_preview.short_description = "Foto"
 

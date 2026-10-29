@@ -259,6 +259,57 @@ class AuthCharacterizationTests(TestCase):
         self.assertContains(response, '—')
 
 
+
+    def test_admin_user_search_by_institucion_does_not_raise_field_error(self):
+        admin = User.objects.create_superuser(
+            username='admin_search_check',
+            email='admin_search_check@example.com',
+            password='Passw0rd!',
+        )
+        self.client.force_login(admin)
+        response = self.client.get('/admin/auth/user/?q=Empresa')
+        self.assertEqual(response.status_code, 200)
+
+    def test_admin_user_list_shows_institucion_y_rol_desde_auth_perfil(self):
+        admin = User.objects.create_superuser(
+            username='admin_lista_check',
+            email='admin_lista_check@example.com',
+            password='Passw0rd!',
+        )
+        User.objects.create_user(
+            username='usuario_con_institucion',
+            email='usuario_con_institucion@example.com',
+            password='Passw0rd!',
+        )
+        PerfilUsuario.objects.filter(user__username='usuario_con_institucion').update(
+            institucion='Empresa ABC',
+            is_teacher=True,
+        )
+
+        self.client.force_login(admin)
+        response = self.client.get('/admin/auth/user/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Empresa ABC')
+
+    def test_configuracion_muestra_institucion_del_perfil(self):
+        usuario = User.objects.create_user(
+            username='usuario_config_check',
+            email='usuario_config_check@example.com',
+            password='Passw0rd!',
+        )
+        PerfilUsuario.objects.update_or_create(
+            user=usuario,
+            defaults={'institucion': 'Empresa Config'},
+        )
+
+        self.client.force_login(usuario)
+        response = self.client.get(reverse('configuracion'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Empresa Config')
+
+
 class AuthPermissionsTests(TestCase):
     def test_get_primary_role_without_group(self):
         user = User.objects.create_user(username='no_role_user', password='Passw0rd!')
