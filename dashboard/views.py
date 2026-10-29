@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.db import models
-from django.views.decorators.csrf import csrf_exempt
 from datetime import date
 import os
 import json
@@ -478,29 +477,34 @@ def progreso_estudiante(request):
 @login_required
 def crear_curso(request):
     """Vista para que el profesor cree un nuevo curso."""
-    if not request.user.is_staff:
+    if not user_es_profesor(request.user):
         messages.error(request, "No tienes permiso para crear cursos.")
         return redirect("dashboard:dashboard_user")
-    
+
     if request.method == "POST":
         nombre = request.POST.get("nombre")
         descripcion = request.POST.get("descripcion")
         categoria = request.POST.get("categoria")
-        
+
         if not nombre or not descripcion:
             messages.error(request, "Por favor completa todos los campos.")
-            return redirect("crear_curso")
-        
-        # Crear curso asociado al profesor
+            return redirect("dashboard:crear_curso")
+
+        valid_categories = {choice[0] for choice in Curso.CATEGORIAS}
+        if categoria not in valid_categories:
+            messages.error(request, "La categoría seleccionada no es válida.")
+            return redirect("dashboard:crear_curso")
+
         Curso.objects.create(
             nombre=nombre,
             descripcion=descripcion,
             categoria=categoria,
-            profesor=request.user
+            profesor=request.user,
+            grupo=request.POST.get("grupo", "")
         )
         messages.success(request, "📘 Curso creado correctamente.")
         return redirect("dashboard:dashboard_profesor")
-    
+
     return render(request, "crear_curso.html")
 
 @login_required
@@ -606,8 +610,8 @@ def asignar_material_a_curso(request, material_id):
         material = MaterialDidactico.objects.get(id=material_id, profesor=request.user)
     except MaterialDidactico.DoesNotExist:
         messages.error(request, "❌ No se encontró el material.")
-        return redirect('profesor_material')
-    
+        return redirect('dashboard:profesor_material')
+
     if request.method == 'POST':
         curso_id = request.POST.get('curso')
         try:
@@ -617,8 +621,8 @@ def asignar_material_a_curso(request, material_id):
             messages.success(request, f"✅ Material asignado correctamente al curso {curso.nombre}.")
         except Curso.DoesNotExist:
             messages.error(request, "⚠️ Curso no válido.")
-    
-    return redirect('profesor_material')
+
+    return redirect('dashboard:profesor_material')
 
 # ---------------------------
 # GESTIÓN DE EVALUACIONES
@@ -711,19 +715,20 @@ def quitar_material_evaluacion(request, evaluacion_id, material_id):
         messages.success(request, f"🗑️ El material '{material.titulo}' se quitó de la evaluación.")
     except MaterialDidactico.DoesNotExist:
         messages.error(request, "❌ El material no pertenece a esta evaluación.")
-    
-    return redirect("detalle_evaluacion", evaluacion_id=evaluacion.id)
+
+    return redirect("dashboard:detalle_evaluacion", evaluacion_id=evaluacion.id)
 
 # ---------------------------
 # APIs y VISTAS DE IA
 # ---------------------------
 
+@login_required
 def ai_stats_api(request):
     total_users = User.objects.count()
     total_students = User.objects.filter(groups__name='Alumno').count()
     total_teachers = User.objects.filter(groups__name='Profesor').count()
     total_admins = User.objects.filter(is_staff=True).count()
-    
+
     data = {
         'total_users': total_users,
         'students': total_students,
@@ -747,7 +752,7 @@ def admin_distribution_view(request):
     }
     return render(request, 'admin_dashboard.html', context)
 
-@csrf_exempt
+@login_required
 def ai_chat_api(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido. Usa POST.'}, status=405)
@@ -833,7 +838,7 @@ def ai_chat_api(request):
     
     return JsonResponse({'reply': reply})
 
-@csrf_exempt
+@login_required
 def ai_recommendations_api(request):
     """API sencilla de recomendaciones IA."""
     if not request.user.is_authenticated:

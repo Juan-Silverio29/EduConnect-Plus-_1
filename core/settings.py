@@ -156,6 +156,7 @@ AUTHENTICATION_BACKENDS = [
 AXES_FAILURE_LIMIT = 5  # Número de intentos fallidos antes de bloquear
 AXES_COOLOFF_TIME = timedelta(minutes=15)  # Tiempo de bloqueo
 AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
@@ -171,7 +172,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ]
 }
 
@@ -259,27 +260,18 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Axes configuration (protección contra ataques de fuerza bruta) - SOLO UNA VEZ
+# Axes configuration (protección contra ataques de fuerza bruta)
 AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = timedelta(minutes=30)
 AXES_RESET_ON_SUCCESS = True
-AXES_LOCKOUT_PARAMETERS = [["username"]]  # ✅ CORREGIDO: lista de listas
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 AXES_LOCKOUT_CALLABLE = "auth_app.utils.lockout_response"
 AXES_COOLOFF_MESSAGE = "Demasiados intentos fallidos. Por favor espera 30 minutos."
-
-# ELIMINA estas líneas duplicadas:
-# AXES_USE_USER_AGENT = True  # ❌ ESTÁ DEPRECADA
-
 AXES_NEVER_LOCKOUT_WHITELIST = [
     '127.0.0.1',
     '3.146.150.176',
 ]
-
 AXES_VERBOSE = True
-
-# Logging de intentos fallidos
-AXES_VERBOSE = True
-# ✅ AGREGAR esta configuración importante:
 AXES_HANDLER = 'axes.handlers.database.AxesDatabaseHandler'
 AXES_LOCKOUT_TEMPLATE = None
 AXES_LOCKOUT_URL = None
