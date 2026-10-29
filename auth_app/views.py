@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django import forms
-from .models import PerfilUsuario
+from .models import PerfilUsuario, user_es_profesor
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView
 from django.urls import reverse_lazy
@@ -97,10 +97,10 @@ def login_view(request):
             print(f"[DEBUG] Usuario autenticado correctamente: {user.username}")
             if user.is_superuser:
                 return redirect("/admin/")
-            elif user.is_staff:
-                return redirect("dashboard_profesor")
+            elif user_es_profesor(user):
+                return redirect("dashboard:dashboard_profesor")
             else:
-                return redirect("dashboard_user")
+                return redirect("dashboard:dashboard_user")
         else:
             messages.error(request, "Usuario o contraseña incorrectos")
     return render(request, "login.html")
@@ -129,6 +129,8 @@ def register_view(request):
             messages.error(request, "El usuario ya existe")
             return redirect("register")
 
+        es_profesor = rol == "profesor"
+
         # Crear usuario
         user = User.objects.create_user(
             username=username,
@@ -137,27 +139,27 @@ def register_view(request):
             first_name=nombre,
             last_name=apellido,
             is_superuser=False,
-            is_staff=(rol == "profesor")
+            is_staff=es_profesor
         )
 
-        # Crear perfil
+        # Crear perfil y mantener sincronizado el rol
         PerfilUsuario.objects.create(
             user=user,
             institucion=institucion if institucion else None,
-            foto_perfil="img/default_user.png"
+            foto_perfil="img/default_user.png",
+            is_teacher=es_profesor,
         )
 
         # Iniciar sesión automáticamente
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
         # Redirección según rol
-        if rol == "profesor":
+        if es_profesor:
             messages.success(request, f"✅ Bienvenido profesor {nombre} {apellido}")
-            return redirect("dashboard_profesor")
+            return redirect("dashboard:dashboard_profesor")
         else:
             messages.success(request, f"✅ Bienvenido {nombre} {apellido}")
-            return redirect("dashboard_user")
-
+            return redirect("dashboard:dashboard_user")
     return render(request, "register.html")
 
 def logout_view(request):
@@ -375,9 +377,9 @@ def dashboard(request):
     if user.is_superuser:
         return redirect('/admin/')
     elif user.is_staff:
-        return redirect('dashboard_profesor')
+        return redirect('dashboard:dashboard_profesor')
     else:
-        return redirect('dashboard_user')
+        return redirect('dashboard:dashboard_user')
 
 @login_required
 def estudiante_dashboard(request):
@@ -475,7 +477,7 @@ def configuracion_profesor_view(request):
 
     if not request.user.is_staff:
         messages.warning(request, "Acceso restringido a profesores.")
-        return redirect("dashboard_user")
+        return redirect("dashboard:dashboard_user")
 
     context = {"perfil": perfil}
     return render(request, "configuracion_profesor.html", context)
@@ -501,14 +503,14 @@ class CustomPasswordChangeView(PasswordChangeView):
 def admin_dashboard(request):
     if not request.user.is_superuser:
         messages.error(request, "Acceso restringido al administrador.")
-        return redirect("dashboard_user")
+        return redirect("dashboard:dashboard_user")
     return redirect("/admin/")
 
 @login_required
 def admin_cursos(request):
     if not request.user.is_superuser:
         messages.error(request, "Acceso restringido al administrador.")
-        return redirect("dashboard_user")
+        return redirect("dashboard:dashboard_user")
 
     try:
         from resources.models import Material
@@ -523,7 +525,7 @@ def admin_cursos(request):
 def admin_usuarios(request):
     if not request.user.is_superuser:
         messages.error(request, "Acceso restringido al administrador.")
-        return redirect("dashboard_user")
+        return redirect("dashboard:dashboard_user")
 
     usuarios = []
     for user in User.objects.all():
@@ -552,7 +554,7 @@ def admin_usuarios(request):
 def admin_estadisticas(request):
     if not request.user.is_superuser:
         messages.error(request, "Acceso restringido al administrador.")
-        return redirect("dashboard_user")
+        return redirect("dashboard:dashboard_user")
 
     total_usuarios = User.objects.count()
     total_profesores = User.objects.filter(is_staff=True).count()

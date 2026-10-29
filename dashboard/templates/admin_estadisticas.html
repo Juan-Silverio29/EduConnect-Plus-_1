@@ -12,10 +12,10 @@
     <aside class="w-64 bg-blue-800 text-white p-6">
         <h2 class="text-2xl font-bold mb-6">EduConnect+</h2>
         <nav class="space-y-3">
-            <a href="{% url 'dashboard_admin' %}" class="block py-2 px-3 rounded hover:bg-blue-700">🏠 Panel</a>
-            <a href="{% url 'admin_usuarios' %}" class="block py-2 px-3 rounded hover:bg-blue-700">👤 Usuarios</a>
-            <a href="{% url 'admin_cursos' %}" class="block py-2 px-3 rounded hover:bg-blue-700">📚 Cursos</a>
-            <a href="{% url 'admin_estadisticas' %}" class="block py-2 px-3 rounded bg-blue-700">📊 Estadísticas</a>
+            <a href="{% url 'dashboard:dashboard_admin' %}" class="block py-2 px-3 rounded hover:bg-blue-700">🏠 Panel</a>
+            <a href="{% url 'dashboard:admin_usuarios' %}" class="block py-2 px-3 rounded hover:bg-blue-700">👤 Usuarios</a>
+            <a href="{% url 'dashboard:admin_cursos' %}" class="block py-2 px-3 rounded hover:bg-blue-700">📚 Cursos</a>
+            <a href="{% url 'dashboard:admin_estadisticas' %}" class="block py-2 px-3 rounded bg-blue-700">📊 Estadísticas</a>
         </nav>
     </aside>
 

@@ -233,13 +233,13 @@
           window.location.href = "/admin/";
           break;
         case "profesor":
-          window.location.href = "{% url 'dashboard_profesor' %}";
+          window.location.href = "{% url 'dashboard:dashboard_profesor' %}";
           break;
         case "estudiante":
-          window.location.href = "{% url 'dashboard_user' %}";
+          window.location.href = "{% url 'dashboard:dashboard_user' %}";
           break;
         default:
-          window.location.href = "{% url 'dashboard_user' %}";
+          window.location.href = "{% url 'dashboard:dashboard_user' %}";
       }
     }
 

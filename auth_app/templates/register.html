@@ -335,9 +335,9 @@
           setTimeout(() => {
             modal.hide();
             if (respData.rol === "profesor") {
-              window.location.href = "{% url 'dashboard_profesor' %}";
+              window.location.href = "{% url 'dashboard:dashboard_profesor' %}";
             } else {
-              window.location.href = "{% url 'dashboard_user' %}";
+              window.location.href = "{% url 'dashboard:dashboard_user' %}";
             }
           }, 4000);
         }

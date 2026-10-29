@@ -13,5 +13,21 @@ class PerfilUsuario(models.Model):
     semestre = models.CharField(max_length=20, blank=True, null=True)
     foto_perfil = models.ImageField(upload_to='perfiles/', blank=True, null=True, default='img/default_user.png')
     is_teacher = models.BooleanField(default=False)
+
     def __str__(self):
         return self.user.username
+
+
+def user_es_profesor(user):
+    """Devuelve True si el usuario debe comportarse como profesor.
+    Se toma en cuenta tanto `is_staff` como el perfil `is_teacher` para soportar
+    usuarios antiguos sin perfil o perfiles desincronizados.
+    """
+    if not user or not getattr(user, 'is_authenticated', False):
+        return False
+    if user.is_superuser:
+        return True
+    perfil = getattr(user, 'perfilusuario', None)
+    if perfil:
+        return bool(perfil.is_teacher) or bool(user.is_staff)
+    return bool(user.is_staff)

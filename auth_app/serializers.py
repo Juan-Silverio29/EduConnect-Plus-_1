@@ -29,9 +29,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password1')
         validated_data.pop('password2', None)
 
+        es_profesor = rol == 'profesor'
+
         user = User(**validated_data)
         user.set_password(password)
-        user.is_staff = rol == "profesor"
+        user.is_staff = es_profesor
         user.save()
 
         PerfilUsuario.objects.create(
@@ -39,7 +41,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             institucion=institucion,
             alias=alias,
             semestre=semestre,
-            foto_perfil="img/default_user.png"
+            foto_perfil="img/default_user.png",
+            is_teacher=es_profesor,
         )
 
         return user

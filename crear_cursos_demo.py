@@ -4,12 +4,28 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from django.contrib.auth.models import User
+from auth_app.models import PerfilUsuario
 from dashboard.models import Curso, Inscripcion, MaterialDidactico, Tarea, Evaluacion, Actividad
 from django.utils import timezone
 from datetime import timedelta
 
-profe, _ = User.objects.get_or_create(username='profesor_demo', defaults={'email': 'profe@educonnect.com'})
-alu, _ = User.objects.get_or_create(username='estudiante_demo', defaults={'email': 'estudiante@educonnect.com'})
+profe, _ = User.objects.get_or_create(
+    username='profesor_demo',
+    defaults={'email': 'profe@educonnect.com', 'is_staff': True}
+)
+alu, _ = User.objects.get_or_create(
+    username='estudiante_demo',
+    defaults={'email': 'estudiante@educonnect.com', 'is_staff': False}
+)
+
+PerfilUsuario.objects.get_or_create(
+    user=profe,
+    defaults={'institucion': 'EduConnect Demo', 'is_teacher': True}
+)
+PerfilUsuario.objects.get_or_create(
+    user=alu,
+    defaults={'institucion': 'EduConnect Demo', 'is_teacher': False}
+)
 
 CREADOS = []
 
@@ -129,4 +145,4 @@ for curso in [c1, c2]:
 print(f'✅ Cursos creados nuevos: {CREADOS if CREADOS else "(ya existían)"}')
 print(f'📚 Total cursos en plataforma: {Curso.objects.count()}')
 print(f'📦 Materiales: {MaterialDidactico.objects.count()} | Tareas: {Tarea.objects.count()} | Evaluaciones: {Evaluacion.objects.count()}')
-print(f'👤 estudiante_demo inscrito en: ' + ', '.join(Inscripcion.objects.filter(alumno=alu).values_list('curso__nombre', flat=True)))
+print(f'👤 estudiante_demo inscrito en: ' + ' , ' .join(Inscripcion.objects.filter(alumno=alu).values_list('curso__nombre', flat=True)))

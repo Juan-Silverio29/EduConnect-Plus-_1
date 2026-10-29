@@ -129,11 +129,11 @@
     <!-- 🔹 Botón Regresar dinámico -->
     <div class="text-center mt-3">
         {% if user.is_staff %}
-            <a href="{% url 'dashboard_profesor' %}" class="btn-back">
+            <a href="{% url 'dashboard:dashboard_profesor' %}" class="btn-back">
                 <i class="bi bi-arrow-left"></i> Regresar al Dashboard
             </a>
         {% else %}
-            <a href="{% url 'dashboard_user' %}" class="btn-back">
+            <a href="{% url 'dashboard:dashboard_user' %}" class="btn-back">
                 <i class="bi bi-arrow-left"></i> Regresar
             </a>
         {% endif %}

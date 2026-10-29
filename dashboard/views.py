@@ -105,9 +105,9 @@ from .forms import CursoForm, MaterialForm, EvaluacionForm
 @login_required
 def dashboard_view(request):
     user = request.user
-    if user.is_superuser or user.is_staff:
+    if user.is_superuser:
         return redirect('dashboard:dashboard_admin')
-    elif hasattr(user, "perfilusuario") and getattr(user.perfilusuario, "is_teacher", False):
+    elif user.is_staff or (hasattr(user, 'perfilusuario') and getattr(user.perfilusuario, 'is_teacher', False)):
         return redirect('dashboard:dashboard_profesor')
     else:
         return redirect('dashboard:dashboard_user')
@@ -480,7 +480,7 @@ def crear_curso(request):
     """Vista para que el profesor cree un nuevo curso."""
     if not request.user.is_staff:
         messages.error(request, "No tienes permiso para crear cursos.")
-        return redirect("dashboard_user")
+        return redirect("dashboard:dashboard_user")
     
     if request.method == "POST":
         nombre = request.POST.get("nombre")
@@ -499,7 +499,7 @@ def crear_curso(request):
             profesor=request.user
         )
         messages.success(request, "📘 Curso creado correctamente.")
-        return redirect("dashboard_profesor")
+        return redirect("dashboard:dashboard_profesor")
     
     return render(request, "crear_curso.html")
 
