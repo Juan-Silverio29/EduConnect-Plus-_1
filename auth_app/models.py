@@ -1,9 +1,10 @@
 # auth_app/models.py
-from django.db import models
+from django.db import models, OperationalError
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
 import json
 
 
@@ -56,7 +57,12 @@ def user_es_profesor(user):
         return False
     if user.is_superuser:
         return True
-    perfil = getattr(user, 'auth_perfil', None)
+
+    try:
+        perfil = getattr(user, 'auth_perfil')
+    except (AttributeError, ObjectDoesNotExist, OperationalError):
+        perfil = None
+
     if perfil:
         return bool(perfil.is_teacher) or bool(user.is_staff)
     return bool(user.is_staff)

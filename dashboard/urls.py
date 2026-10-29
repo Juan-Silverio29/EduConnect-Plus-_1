@@ -44,6 +44,8 @@ urlpatterns = [
     path('alumno/cursos-disponibles/', views.cursos_disponibles, name='cursos_disponibles'),
     path('alumno/inscribirse/<int:curso_id>/', views.inscribirse_curso, name='inscribirse_curso'),
     path('curso/<int:curso_id>/', views.detalle_curso, name='detalle_curso_alumno'),
+    path('tarea/<int:tarea_id>/', views.detalle_tarea, name='detalle_tarea'),
+    path('tarea/<int:tarea_id>/entregar/', views.entregar_tarea, name='entregar_tarea'),
 
     # 🟩 ESTA ES LA ÚNICA RUTA CORRECTA PARA MIS RECURSOS
     path('alumno/mis-recursos/', views.mis_recursos, name='mis_recursos'),

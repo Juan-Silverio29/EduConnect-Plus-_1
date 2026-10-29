@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">{{ tarea.titulo }}</h3>
+    </div>
+    <div class="card-body">
+      <p><strong>Curso:</strong> {{ curso.nombre }}</p>
+      <p><strong>Fecha de entrega:</strong> {{ tarea.fecha_entrega|date:"d/m/Y H:i" }}</p>
+      <p><strong>Puntos:</strong> {{ tarea.puntos }}</p>
+      <div class="mb-3">
+        <h5>Descripción</h5>
+        <p>{{ tarea.descripcion }}</p>
+      </div>
+
+      {% if entrega %}
+        <div class="alert alert-success">
+          <strong>Entrega registrada.</strong>
+          {% if entrega.texto %}
+            <div class="mt-2">{{ entrega.texto }}</div>
+          {% endif %}
+          {% if entrega.archivo %}
+            <div class="mt-2">
+              <a href="{{ entrega.archivo.url }}" class="btn btn-sm btn-outline-success" target="_blank">Ver archivo entregado</a>
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="alert alert-warning">Aún no has entregado esta tarea.</div>
+      {% endif %}
+
+      <div class="d-flex gap-2">
+        <a href="{% url 'dashboard:entregar_tarea' tarea.id %}" class="btn btn-primary">Entregar tarea</a>
+        <a href="{% url 'dashboard:detalle_curso_alumno' curso.id %}" class="btn btn-outline-secondary">Volver al curso</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

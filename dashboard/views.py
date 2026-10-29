@@ -71,11 +71,8 @@ def evaluar_insignias(usuario):
     # Los profesores/admin no participan del sistema de insignias
     if usuario.is_staff or usuario.is_superuser:
         return []
-    try:
-        if usuario.perfilusuario.is_teacher:
-            return []
-    except Exception:
-        pass
+    if user_es_profesor(usuario):
+        return []
 
     nuevas = []
     n_cursos = Inscripcion.objects.filter(alumno=usuario).count()
@@ -577,10 +574,50 @@ def detalle_curso(request, curso_id):
         "entregas_dict": entregas_dict,
         "materiales": materiales,
         "alumnos": alumnos,
-        "url_volver": url_volver
+        "url_volver": url_volver,
+        "es_profesor": es_profesor,
     }
 
     return render(request, "detalle_curso.html", context)
+
+
+@login_required
+def detalle_tarea(request, tarea_id):
+    tarea = get_object_or_404(Tarea, id=tarea_id)
+    entrega = EntregaTarea.objects.filter(tarea=tarea, alumno=request.user).first()
+    return render(request, "detalle_tarea.html", {
+        "tarea": tarea,
+        "entrega": entrega,
+        "curso": tarea.curso,
+    })
+
+
+@login_required
+def entregar_tarea(request, tarea_id):
+    tarea = get_object_or_404(Tarea, id=tarea_id)
+
+    if request.method == 'POST':
+        archivo = request.FILES.get('archivo')
+        texto = (request.POST.get('texto') or '').strip()
+
+        if not archivo and not texto:
+            messages.error(request, 'Debes adjuntar un archivo o dejar una descripción antes de entregar.')
+            return redirect('dashboard:entregar_tarea', tarea_id=tarea.id)
+
+        entrega, created = EntregaTarea.objects.update_or_create(
+            tarea=tarea,
+            alumno=request.user,
+            defaults={'archivo': archivo, 'texto': texto}
+        )
+
+        if not archivo:
+            entrega.archivo = None
+            entrega.save(update_fields=['texto'])
+
+        messages.success(request, '✅ Tu entrega se guardó correctamente.')
+        return redirect('dashboard:detalle_tarea', tarea_id=tarea.id)
+
+    return render(request, "entregar_tarea.html", {"tarea": tarea})
 
 
 

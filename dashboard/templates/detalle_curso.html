@@ -103,7 +103,7 @@
     </div>
 
     <!-- Solo mostrar para profesores -->
-    {% if user.is_staff or user.perfilusuario.is_teacher %}
+    {% if user.is_staff or user.auth_perfil.is_teacher %}
       <!-- Alumnos inscritos -->
       {% if alumnos %}
       <div class="section-card student-card">
