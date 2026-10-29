@@ -539,7 +539,7 @@ def admin_usuarios(request):
             rol = "Profesor"
         else:
             rol = "Estudiante"
-        perfil = getattr(user, "perfilusuario", None)
+        perfil = getattr(user, "auth_perfil", None)
         institucion = perfil.institucion if perfil else "—"
         usuarios.append({
             "id": user.id,

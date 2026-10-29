@@ -63,7 +63,6 @@ class AuthCharacterizationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Alumnos Inscritos')
 
-
     def test_user_es_profesor_superuser(self):
         user = User.objects.create_superuser(username='admin_role', email='admin_role@example.com', password='Passw0rd!')
         self.assertTrue(user_es_profesor(user))
@@ -218,6 +217,47 @@ class AuthCharacterizationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    def test_admin_usuarios_muestra_institucion_del_perfil(self):
+        admin = User.objects.create_superuser(
+            username='admin_usuarios_check',
+            email='admin_usuarios_check@example.com',
+            password='Passw0rd!',
+        )
+        usuario = User.objects.create_user(
+            username='colaborador_con_perfil',
+            email='colaborador_con_perfil@example.com',
+            password='Passw0rd!',
+        )
+        PerfilUsuario.objects.update_or_create(
+            user=usuario,
+            defaults={'institucion': 'Empresa XYZ'},
+        )
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse('auth_admin_usuarios'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Empresa XYZ')
+
+    def test_admin_usuarios_muestra_guion_si_no_hay_perfil(self):
+        admin = User.objects.create_superuser(
+            username='admin_sin_perfil_check',
+            email='admin_sin_perfil_check@example.com',
+            password='Passw0rd!',
+        )
+        User.objects.create_user(
+            username='usuario_sin_perfil',
+            email='usuario_sin_perfil@example.com',
+            password='Passw0rd!',
+        )
+        PerfilUsuario.objects.filter(user__username='usuario_sin_perfil').delete()
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse('auth_admin_usuarios'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '—')
+
 
 class AuthPermissionsTests(TestCase):
     def test_get_primary_role_without_group(self):
@@ -296,4 +336,3 @@ class AuthMigrationRoundTripTests(TransactionTestCase):
             self.assertEqual(self.contar(), 4)
         finally:
             call_command('migrate', verbosity=0)
-

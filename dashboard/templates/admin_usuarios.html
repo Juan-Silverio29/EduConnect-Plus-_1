@@ -18,7 +18,7 @@
         <h2 class="text-2xl font-bold mb-6">EduConnect+</h2>
         <nav class="space-y-3">
             <a href="{% url 'dashboard:dashboard_admin' %}" class="block py-2 px-3 rounded hover:bg-blue-700">🏠 Panel</a>
-            <a href="{% url 'dashboard:admin_usuarios' %}" class="block py-2 px-3 rounded bg-blue-700">👤 Usuarios</a>
+            <a href="{% url 'auth_admin_usuarios' %}" class="block py-2 px-3 rounded bg-blue-700">👤 Usuarios</a>
             <a href="{% url 'dashboard:admin_cursos' %}" class="block py-2 px-3 rounded hover:bg-blue-700">📚 Cursos</a>
             <a href="{% url 'dashboard:admin_estadisticas' %}" class="block py-2 px-3 rounded hover:bg-blue-700">📊 Estadísticas</a>
         </nav>
@@ -38,15 +38,17 @@
                         <th class="py-3 px-6 text-left">ID</th>
                         <th class="py-3 px-6 text-left">Nombre</th>
                         <th class="py-3 px-6 text-left">Rol</th>
+                        <th class="py-3 px-6 text-left">Institución</th>
                         <th class="py-3 px-6 text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for usuario in usuarios %}
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="py-3 px-6">{{ usuario.user.id }}</td>
-                        <td class="py-3 px-6">{{ usuario.user.first_name }} {{ usuario.user.last_name }}</td>
-                        <td class="py-3 px-6">{% if usuario.is_teacher %}Profesor{% else %}Estudiante{% endif %}</td>
+                        <td class="py-3 px-6">{{ usuario.id }}</td>
+                        <td class="py-3 px-6">{{ usuario.nombre }}</td>
+                        <td class="py-3 px-6">{{ usuario.rol }}</td>
+                        <td class="py-3 px-6">{{ usuario.institucion }}</td>
                         <td class="py-3 px-6 text-center space-x-2">
                             <button class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Editar</button>
                             <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>
@@ -54,7 +56,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center py-4 text-gray-500">No hay usuarios registrados.</td>
+                        <td colspan="5" class="text-center py-4 text-gray-500">No hay usuarios registrados.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
